@@ -1,0 +1,25 @@
+package com.example.demo.Service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.Mapper.UserMapper;
+import com.example.demo.Model.User;
+
+@Service
+public class UserService {
+	
+	@Autowired
+	public UserMapper userMapper;
+	
+	public int InsertUser(User user) {
+		
+		return userMapper.InsertUser(user);
+	}
+	
+	public List<User> SelectUser(){
+		return userMapper.SelectUser();
+	}
+}
