@@ -11,20 +11,20 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+
 export default function Signup() {
-  const [gender, setGender] = useState(null); // 남/여 선택 상태
+  
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [address, setAddress] = useState("");
+  const [gender, setGender] = useState(null);
 
   const navigation = useNavigation();
-  const [displayValue, setDisplayValue] = useState("");
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-
-
-
-
-
-
-
 
 const handleSignup = async () => {
   try {
@@ -43,12 +43,7 @@ const handleSignup = async () => {
   }
 };
 
-
-
-
-
-
-  return (
+return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -57,24 +52,77 @@ const handleSignup = async () => {
         <Text style={styles.logoText}>GymSpot</Text>
       </View>
 
-
-
-
-<Text style={styles.output}>{displayValue}</Text>
-
-
-
-
-      
       <View style={styles.inputContainer}>
-        <TextInput placeholder="아이디" value={userId} onChangeText={setUserId} style={styles.input}/>
-        <TextInput placeholder="비밀번호" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
-        <TextInput placeholder="이름" style={styles.input} />
-        <TextInput placeholder="전화번호" style={styles.input} />
-        <TextInput placeholder="이메일" style={styles.input} />
-        <TextInput placeholder="생년월일 (YYYY-MM-DD)" style={styles.input} />
-        <TextInput placeholder="성별 (male/female)" style={styles.input} />
-
+        <View style={{ flexDirection: "row" }}>
+        <TextInput
+          placeholder="아이디"
+          style={[styles.contactInput, { width: 255 }]}
+          value={id}
+          onChangeText={setId}
+        />
+        <TouchableOpacity style={styles.contactButton}>
+          <Text style={styles.contactButtonText}>중복 확인</Text>
+        </TouchableOpacity>
+        </View>
+        <TextInput
+          placeholder="비밀번호 (특수문자 포함, 8자 이상)"
+          style={styles.input}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TextInput
+          placeholder="비밀번호 확인"
+          style={styles.input}
+          secureTextEntry
+          value={passwordConfirm}
+          onChangeText={setPasswordConfirm}
+        />
+        <View style={{ flexDirection: "row", gap: 15}}>
+        <TextInput
+          placeholder="이름"
+          style={[styles.input, { width: 150 }]}
+          value={name}
+          onChangeText={setName}
+        />
+          <TextInput
+          placeholder="생년월일 ex)19900101"
+          style={[styles.input, { width: 165 }]}
+          value={birthdate}
+          onChangeText={setBirthdate}
+          keyboardType="number-pad"
+        />
+        </View>
+        <View style={{ flexDirection: "row" }}>
+          <TextInput
+            placeholder="연락처"
+            style={styles.contactInput}
+            value={contact}
+            onChangeText={setContact}
+            keyboardType="phone-pad"
+          />
+          <TouchableOpacity style={styles.contactButton}>
+            <Text style={styles.contactButtonText}>인증</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flexDirection: "row" }}>
+          <TextInput
+            placeholder="이메일"
+            style={styles.contactInput}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
+          <TouchableOpacity style={styles.contactButton}>
+            <Text style={styles.contactButtonText}>인증</Text>
+          </TouchableOpacity>
+        </View>
+        <TextInput
+          placeholder="주소"
+          style={styles.input}
+          value={address}
+          onChangeText={setAddress}
+        />
         <View style={styles.genderContainer}>
           <TouchableOpacity
             style={[styles.genderButton, gender === "male" && styles.genderSelected]}
@@ -107,12 +155,15 @@ const handleSignup = async () => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="회원가입" onPress={handleSignup} color="#1E90FF" />
+       <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
+  <Text style={styles.signupButtonText}>회원가입</Text>
+</TouchableOpacity>
+
       </View>
 
       <View style={styles.loginContainer}>
-        <Text style={styles.signupText}>계정이 있으신가요?</Text>
-        <Button title="로그인" onPress={() => {navigation.navigate("Login")}} color="#32CD32" />
+        <Text>계정이 있으신가요?</Text>
+        <Button title="로그인" onPress={() => {navigation.replace("Login")}} color="#1E90FF" />
       </View>
     </KeyboardAvoidingView>
   );
@@ -123,7 +174,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
-    backgroundColor: "#f5f5f5",
   },
   logoContainer: {
     alignItems: "center",
@@ -138,6 +188,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: "center",
   },
+   contactInput: {
+  width: 280,      
+  backgroundColor: "#fff",
+  paddingHorizontal: 15,
+  paddingVertical: 12,
+  borderRadius: 8,
+  marginBottom: 10,
+  borderWidth: 1,
+  borderColor: "#ccc",
+  marginRight: 9,
+},
   input: {
     width: 330,
     backgroundColor: "#fff",
@@ -147,6 +208,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#ccc",
+  },
+  contactButton: {
+    borderColor: '#1E90FF',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingHorizontal: 9,
+    height: 40,
+  },
+  contactButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1E90FF',
+  },
+  signupText: {
   },
   genderContainer: {
     flexDirection: "row",
@@ -180,13 +258,24 @@ const styles = StyleSheet.create({
 
   buttonContainer: {
     marginBottom: 20,
+    alignItems: "center",
   },
   loginContainer: {
     alignItems: "center",
   },
-  signupText: {
-    marginBottom: 10,
-    fontSize: 16,
-    color: "#555",
-  },
+  signupButton: {
+  backgroundColor: '#1E90FF',
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 330,
+},
+signupButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: 'bold',
+},
+
 });
+
