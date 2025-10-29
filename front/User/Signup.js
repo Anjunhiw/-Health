@@ -32,7 +32,7 @@ const handleSignup = async () => {
       user_id: userId,         // 아이디
       password: password,      // 비밀번호
     });
-    console.log(response.data);
+    console.log("데이터: ",response.data);
     setDisplayValue(
       `서버 응답: ${response.data}\n` +
       `아이디: ${userId}\n` +
@@ -155,7 +155,7 @@ return (
       </View>
 
       <View style={styles.buttonContainer}>
-       <TouchableOpacity style={styles.signupButton} onPress={() => {handleSignup}}>
+       <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
   <Text style={styles.signupButtonText}>회원가입</Text>
 </TouchableOpacity>
 
@@ -278,5 +278,4 @@ signupButtonText: {
 },
 
 });
-
 
