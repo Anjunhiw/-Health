@@ -155,7 +155,7 @@ return (
       </View>
 
       <View style={styles.buttonContainer}>
-       <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
+       <TouchableOpacity style={styles.signupButton} onPress={() => {handleSignup}}>
   <Text style={styles.signupButtonText}>회원가입</Text>
 </TouchableOpacity>
 
@@ -278,4 +278,5 @@ signupButtonText: {
 },
 
 });
+
 
