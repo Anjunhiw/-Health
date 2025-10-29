@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function Signup() {
   
-  const [id, setId] = useState("");
+  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [name, setName] = useState("");
@@ -23,12 +23,13 @@ export default function Signup() {
   const [birthdate, setBirthdate] = useState("");
   const [address, setAddress] = useState("");
   const [gender, setGender] = useState(null);
+  const [displayValue, setDisplayValue] = useState("");
 
   const navigation = useNavigation();
 
 const handleSignup = async () => {
   try {
-    const response = await axios.post("http://192.168.219.101:8080/signup", {
+    const response = await axios.post("http://192.168.219.142:8080/signup", {
       user_id: userId,         // 아이디
       password: password,      // 비밀번호
     });
@@ -54,11 +55,12 @@ return (
 
       <View style={styles.inputContainer}>
         <View style={{ flexDirection: "row" }}>
+          <Text>{displayValue}</Text>
         <TextInput
           placeholder="아이디"
           style={[styles.contactInput, { width: 255 }]}
-          value={id}
-          onChangeText={setId}
+          value={userId}
+          onChangeText={setUserId}
         />
         <TouchableOpacity style={styles.contactButton}>
           <Text style={styles.contactButtonText}>중복 확인</Text>

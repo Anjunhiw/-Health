@@ -13,7 +13,7 @@ import com.example.demo.Model.User;
 import com.example.demo.Service.UserService;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.219.101:8081") // 개인아이피로 바꿔야함 채일  "http://192.168.219.101:8081"
+@CrossOrigin(origins = "http://192.168.219.142:8081") // 개인아이피로 바꿔야함 채일  "http://192.168.219.101:8081"
 public class SignController {
 
 	@Autowired
