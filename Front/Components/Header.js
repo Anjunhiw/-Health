@@ -1,5 +1,6 @@
-import { Text, View, StyleSheet, SafeAreaView, TouchableOpacity, Image } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Header() {
 

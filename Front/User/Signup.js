@@ -110,14 +110,14 @@ return (
         <View style={{ flexDirection: "row" }}>
           <TextInput
             placeholder="이메일"
-            style={styles.contactInput}
+            style={styles.input}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
           />
-          <TouchableOpacity style={styles.contactButton}>
+          {/* <TouchableOpacity style={styles.contactButton}>
             <Text style={styles.contactButtonText}>인증</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <TextInput
           placeholder="주소"
