@@ -22,4 +22,8 @@ public class UserService {
 	public List<User> SelectUser(){
 		return userMapper.SelectUser();
 	}
+
+	public User findByUserId(String userId) {
+	    return userMapper.findByUserId(userId); // 매퍼 호출
+	}
 }

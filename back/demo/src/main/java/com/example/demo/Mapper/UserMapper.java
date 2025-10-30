@@ -11,4 +11,5 @@ import com.example.demo.Model.User;
 public interface UserMapper {
 	int InsertUser(User user);
 	List<User> SelectUser();
+	User findByUserId(String userId);
 }

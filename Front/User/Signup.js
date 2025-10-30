@@ -13,7 +13,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 export default function Signup() {
-  
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -29,15 +28,27 @@ export default function Signup() {
 
 const handleSignup = async () => {
   try {
-    const response = await axios.post("http://192.168.219.142:8080/signup", {
+    const response = await axios.post("http://192.168.219.101:8080/signup", {
       user_id: userId,         // 아이디
       password: password,      // 비밀번호
+      name: name,              // 이름
+      contact: contact,        // 연락처
+      email: email,            // 이메일
+      birthdate: birthdate,    // 생년월일
+      address: address,        // 주소
+      gender: gender,          // 성별
     });
     console.log("데이터: ",response.data);
     setDisplayValue(
       `서버 응답: ${response.data}\n` +
       `아이디: ${userId}\n` +
-      `비밀번호: ${password}\n`
+      `비밀번호: ${password}\n`+
+      `이름: ${name}\n`+
+      `연락처: ${contact}\n`+
+      `이메일: ${email}\n`+
+      `생년월일: ${birthdate}\n`+
+      `주소: ${address}\n`+
+      `성별: ${gender}`
     );
   } catch (error) {
     setDisplayValue(`에러 발생: ${error.message}`);
@@ -55,7 +66,6 @@ return (
 
       <View style={styles.inputContainer}>
         <View style={{ flexDirection: "row" }}>
-          <Text>{displayValue}</Text>
         <TextInput
           placeholder="아이디"
           style={[styles.contactInput, { width: 255 }]}
@@ -73,6 +83,7 @@ return (
           value={password}
           onChangeText={setPassword}
         />
+{/* <Text>{displayValue}</Text>   콘솔 확인용 잠시    */}
         <TextInput
           placeholder="비밀번호 확인"
           style={styles.input}
@@ -110,14 +121,14 @@ return (
         <View style={{ flexDirection: "row" }}>
           <TextInput
             placeholder="이메일"
-            style={styles.input}
+            style={styles.contactInput}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
           />
-          {/* <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={styles.contactButton}>
             <Text style={styles.contactButtonText}>인증</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
         <TextInput
           placeholder="주소"

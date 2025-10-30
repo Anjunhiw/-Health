@@ -1,10 +1,12 @@
 package com.example.demo.Controller;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;  // Logger import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,24 +15,45 @@ import com.example.demo.Model.User;
 import com.example.demo.Service.UserService;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.219.142:8081") // 개인아이피로 바꿔야함 채일  "http://192.168.219.101:8081"
+@CrossOrigin(origins = "http://192.168.219.101:8081")
 public class SignController {
 
-	@Autowired
-	public UserService userService;
-	
-	@PostMapping("/signup")
-	public int signUp(@RequestBody User user) {
-		return userService.InsertUser(user);
-	}
-	
-//	@PostMapping("/signup")                        //확인
-//	public int signUp(@RequestBody User user) {
-//	    System.out.println("✅ 받은 회원 데이터:");
-//	    System.out.println("ID: " + user.getUser_id());
-//	    System.out.println("PW: " + user.getPassword());
-//	    return userService.InsertUser(user);
-//	}
-	
-	
-} 
+    private static final Logger logger = LoggerFactory.getLogger(SignController.class);
+
+    @Autowired
+    private UserService userService;
+
+    // 회원가입
+    @PostMapping("/signup")
+    public int signUp(@RequestBody User user) {
+        logger.info("✅ 회원가입 요청 들어옴");
+        logger.info("ID: {}, PW: {}", user.getUser_id(), user.getPassword());
+        return userService.InsertUser(user);
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody Map<String, String> payload) {
+        logger.info("✅ 로그인 요청 들어옴: {}", payload);
+
+        String userId = payload.get("user_id");
+        String password = payload.get("password");
+
+        Map<String, Object> response = new HashMap<>();
+
+        User user = userService.findByUserId(userId);
+
+        if (user != null && user.getPassword().trim().equals(password.trim())) {
+            response.put("success", true);
+            response.put("name", user.getName());
+            logger.info("로그인 성공: {}", user.getName());
+        } else {
+            response.put("success", false);
+            response.put("message", "아이디 또는 비밀번호가 올바르지 않습니다.");
+            logger.warn("로그인 실패: userId={}, password={}", userId, password);
+        }
+
+
+        return response;
+    }
+}
