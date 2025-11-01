@@ -12,18 +12,15 @@ export default function Home() {
   }
 
   const gymItems = [
-  { name: '헬스', icon: require('../assets/dumbbell.png') },
+  { name: '헬스', icon: require('../assets/gym.png') },
   { name: '수영', icon: require('../assets/swim.png') },
+  { name: '풋살', icon: require('../assets/futsal.png') },
+  { name: '탁구', icon: require('../assets/table-tennis.png') },
+  { name: '테니스', icon: require('../assets/tennis.png') },
+  { name: '농구', icon: require('../assets/basketball.png') },
   { name: '복싱', icon: require('../assets/boxing.png') },
-  { name: '풋살' },
-  { name: '골프' },
-  { name: '요가 / 필라테스' },
-  { name: '배드민턴 / 테니스' },
-  { name: '탁구' },
-  { name: '농구 / 야구' },
-  { name: '볼링 / 당구' },
-  { name: '태권도 / 유도 / 주짓수' },
-  { name: '공원' },
+  { name: '필라테스', icon: require('../assets/pilates.png') },
+  { name: '태권도', icon: require('../assets/taekwondo.png') },
 ];
 
   return(
@@ -53,8 +50,10 @@ export default function Home() {
         <View style={styles.iconContainer} key={rowIndex}>
           {gymItems.slice(rowIndex * 3, rowIndex * 3 + 3).map((item, index) => (
             <View style={styles.gymIconContainer} key={index}>
+              <TouchableOpacity>
               {item.icon && <Image source={item.icon} style={styles.gymIcon} />}
-              <Text style={styles.gymText}>{item.name}</Text>
+              {/* <Text style={styles.gymText}>{item.name}</Text> */}
+              </TouchableOpacity>
             </View>
           ))}
         </View>
@@ -98,15 +97,14 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 60,
-    gap: 70,
+    marginTop: 40,
+    gap: 30,
   },
   gymIconContainer: {
     alignItems: 'center',
-    gap: 15,
   },
   gymIcon: {
-    width: 50,
-    height: 50
+    width: 100,
+    height: 100
   }
 });
