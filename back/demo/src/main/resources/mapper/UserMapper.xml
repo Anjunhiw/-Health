@@ -18,4 +18,8 @@
     	SELECT * FROM users WHERE user_id = #{userId}
 	</select>
 
+	<!--아이디 중복확인-->
+    <select id="existsByUserId" resultType="int" parameterType="String">
+        SELECT COUNT(*) FROM users WHERE user_id = #{userId}
+    </select>
 </mapper>

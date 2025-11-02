@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import {Alert} from "react-native"
+import { useNavigation } from "@react-navigation/native";
 import {
   TextInput,
   Text,
@@ -10,7 +12,7 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+
 
 export default function Signup() {
   const [userId, setUserId] = useState("");
@@ -22,36 +24,112 @@ export default function Signup() {
   const [birthdate, setBirthdate] = useState("");
   const [address, setAddress] = useState("");
   const [gender, setGender] = useState(null);
+  const [isIdChecked, setIsIdChecked] = useState(false);
   const [displayValue, setDisplayValue] = useState("");
 
   const navigation = useNavigation();
-
+//-------------------------------------------------------------------------------------------회원가입
 const handleSignup = async () => {
+  //아이디 중복여부 확인
+  if (!isIdChecked) {
+    Alert.alert("입력 오류", "아이디 중복 확인을 먼저 해주세요.");
+    return;
+  }
+  // 🔹 입력 검증 (우선순위별)
+  if (!userId.trim()) {
+    Alert.alert("입력 오류", "아이디가 입력되지 않았습니다.");
+    return;
+  } else if (password.length < 8) {
+    Alert.alert("입력 오류", "비밀번호는 최소 8자리 이상이어야 합니다.");
+    return;
+  } else if (!/[A-Z]/.test(password)) {
+    Alert.alert("입력 오류", "비밀번호에 대문자가 최소 1개 포함되어야 합니다.");
+    return;
+  } else if (!/[a-z]/.test(password)) {
+    Alert.alert("입력 오류", "비밀번호에 소문자가 최소 1개 포함되어야 합니다.");
+    return;
+  } else if (!/[0-9]/.test(password)) {
+    Alert.alert("입력 오류", "비밀번호에 숫자가 최소 1개 포함되어야 합니다.");
+    return;
+  } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    Alert.alert("입력 오류", "비밀번호에 특수문자가 최소 1개 포함되어야 합니다.");
+    return;
+  } else if (!passwordConfirm.trim()) {
+    Alert.alert("입력 오류", "비밀번호 확인란이 비어 있습니다.");
+    return;
+  } else if (password !== passwordConfirm) {
+    Alert.alert("입력 오류", "비밀번호가 일치하지 않습니다.");
+    return;
+  } else if (!name.trim()) {
+    Alert.alert("입력 오류", "이름이 입력되지 않았습니다.");
+    return;
+  } else if (birthdate.length !== 8 || isNaN(birthdate)) {
+    Alert.alert("입력 오류", "생년월일은 8자리 숫자(예: 19900101)로 입력해주세요.");
+    return;
+  } else if (!/^01[0-9]{8,9}$/.test(contact)) {
+    Alert.alert("입력 오류", "연락처 형식이 올바르지 않습니다. 예: 01012345678");
+    return;
+  } else if (!email.trim()) {
+    Alert.alert("입력 오류", "이메일이 입력되지 않았습니다.");
+    return;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    Alert.alert("입력 오류", "이메일 형식이 올바르지 않습니다. 예: GymSpot@email.com");
+    return;
+
+  } else if (!address.trim()) {
+    Alert.alert("입력 오류", "주소가 입력되지 않았습니다.");
+    return;
+  } else if (!gender) {
+    Alert.alert("입력 오류", "성별을 선택해주세요.");
+    return;
+  }
   try {
     const response = await axios.post("http://192.168.219.101:8080/signup", {
-      user_id: userId,         // 아이디
-      password: password,      // 비밀번호
-      name: name,              // 이름
-      contact: contact,        // 연락처
-      email: email,            // 이메일
-      birthdate: birthdate,    // 생년월일
-      address: address,        // 주소
-      gender: gender,          // 성별
+      user_id: userId,
+      password: password,
+      name: name,
+      contact: contact,
+      email: email,
+      birthdate: birthdate,
+      address: address,
+      gender: gender,
     });
-    console.log("데이터: ",response.data);
-    setDisplayValue(
-      `서버 응답: ${response.data}\n` +
-      `아이디: ${userId}\n` +
-      `비밀번호: ${password}\n`+
-      `이름: ${name}\n`+
-      `연락처: ${contact}\n`+
-      `이메일: ${email}\n`+
-      `생년월일: ${birthdate}\n`+
-      `주소: ${address}\n`+
-      `성별: ${gender}`
-    );
+
+    console.log("데이터: ", response.data);
+
+    if (response.data === 1) {
+      Alert.alert(
+        "회원가입 성공!",
+        "회원가입이 완료되었습니다.",
+        [{ text: "확인", onPress: () => navigation.replace("Login") }]
+      );
+    } else {
+      Alert.alert("회원가입 실패", "서버 오류 또는 중복된 아이디입니다.");
+    }
   } catch (error) {
-    setDisplayValue(`에러 발생: ${error.message}`);
+    console.error("회원가입 에러:", error.message);
+    Alert.alert("서버 오류", "서버와의 연결에 실패했습니다. 다시 시도해주세요.");
+  }
+};
+//-------------------------------------------------------------------------------------------아이디 중복확인
+const handleCheckId = async () => {
+  if (!userId.trim()) { 
+    Alert.alert("입력 오류", "아이디를 입력해주세요.");
+    return;
+  }
+  try {
+    const response = await axios.get(`http://192.168.219.101:8080/check-id/${userId}`); 
+    console.log("데이터:", response.data);
+    if (response.data.exists) {  
+      Alert.alert("중복된 아이디", "이미 존재하는 아이디입니다.");
+      setIsIdChecked(false)
+    } else {
+      Alert.alert("사용 가능", "사용 가능한 아이디입니다!");
+      setIsIdChecked(true)
+    }
+  } catch (error) {
+    console.log("중복확인 에러:", error.message);
+    Alert.alert("서버 오류", "아이디 중복 확인 중 문제가 발생했습니다.");
   }
 };
 
@@ -70,9 +148,14 @@ return (
           placeholder="아이디"
           style={[styles.contactInput, { width: 255 }]}
           value={userId}
-          onChangeText={setUserId}
+          onChangeText={(text) => {
+            if (text !== userId) {
+              setIsIdChecked(false);
+            }
+            setUserId(text);
+          }}
         />
-        <TouchableOpacity style={styles.contactButton}>
+        <TouchableOpacity style={styles.contactButton} onPress={handleCheckId}>
           <Text style={styles.contactButtonText}>중복 확인</Text>
         </TouchableOpacity>
         </View>
@@ -103,6 +186,7 @@ return (
           style={[styles.input, { width: 165 }]}
           value={birthdate}
           onChangeText={setBirthdate}
+          maxLength={8}
           keyboardType="number-pad"
         />
         </View>

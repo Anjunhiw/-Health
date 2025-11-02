@@ -26,4 +26,10 @@ public class UserService {
 	public User findByUserId(String userId) {
 	    return userMapper.findByUserId(userId); // 매퍼 호출
 	}
+	//아이디 중복확인
+	public boolean existsByUserId(String userId) {
+	    return userMapper.existsByUserId(userId) > 0;
+	}
+	
+	
 }

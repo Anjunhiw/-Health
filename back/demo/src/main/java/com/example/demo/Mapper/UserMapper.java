@@ -12,4 +12,5 @@ public interface UserMapper {
 	int InsertUser(User user);
 	List<User> SelectUser();
 	User findByUserId(String userId);
+	int existsByUserId(String userId); // 아이디 중복확인
 }
