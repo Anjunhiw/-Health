@@ -1,6 +1,6 @@
 import { Text, View, TextInput, StyleSheet, TouchableWithoutFeedback, Keyboard, Image, TouchableOpacity } from "react-native";
-import Header from "../Components/Header";
-import Tab from "../Components/Bottom_Tab";
+import Header from "../../Menu/Header";
+import Tab from "../../Menu/Bottom_Tab";
 import { useState } from "react";
 
 export default function Home() {
@@ -12,15 +12,15 @@ export default function Home() {
   }
 
   const gymItems = [
-  { name: '헬스', icon: require('../assets/gym.png') },
-  { name: '수영', icon: require('../assets/swim.png') },
-  { name: '풋살', icon: require('../assets/futsal.png') },
-  { name: '탁구', icon: require('../assets/table-tennis.png') },
-  { name: '테니스', icon: require('../assets/tennis.png') },
-  { name: '농구', icon: require('../assets/basketball.png') },
-  { name: '복싱', icon: require('../assets/boxing.png') },
-  { name: '필라테스', icon: require('../assets/pilates.png') },
-  { name: '태권도', icon: require('../assets/taekwondo.png') },
+  { name: '헬스', icon: require('../../assets/gym.png') },
+  { name: '수영', icon: require('../../assets/swim.png') },
+  { name: '풋살', icon: require('../../assets/futsal.png') },
+  { name: '탁구', icon: require('../../assets/table-tennis.png') },
+  { name: '테니스', icon: require('../../assets/tennis.png') },
+  { name: '농구', icon: require('../../assets/basketball.png') },
+  { name: '복싱', icon: require('../../assets/boxing.png') },
+  { name: '필라테스', icon: require('../../assets/pilates.png') },
+  { name: '태권도', icon: require('../../assets/taekwondo.png') },
 ];
 
   return(
@@ -42,7 +42,7 @@ export default function Home() {
         </TouchableOpacity>
         <Text style={{fontSize: 18}}>|</Text>
         <TouchableOpacity>
-         <Image source={require('../assets/search.png')} style={styles.searchIcon} />
+         <Image source={require('../../assets/search.png')} style={styles.searchIcon} />
          </TouchableOpacity>
          </View>
       </View>

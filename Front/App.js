@@ -5,11 +5,11 @@ import Login from "./User/Login";
 import Signup from "./User/Signup";
 import Id from "./User/Find/Id";
 import Pw from "./User/Find/Pw";
-import Home from "./Main/Home";
-import Community from "./Main/Community";
-import Event from "./Main/Event";
-import Wishlist from "./Main/Wishlist";
-import My from "./Main/Mypage";
+import Home from "./Main/Home/Home";
+import Community from "./Main/Community/Community";
+import Event from "./Main/Event/Event";
+import Wishlist from "./Main/Wishlist/Wishlist";
+import My from "./Main/Mypage/Mypage";
 
 const Stack = createNativeStackNavigator();
 
