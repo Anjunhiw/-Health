@@ -19,7 +19,7 @@ import com.example.demo.Model.User;
 import com.example.demo.Service.UserService;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.219.101:8081")
+@CrossOrigin(origins = "http://192.168.219.102:8081")
 public class SignController {
 
     private static final Logger logger = LoggerFactory.getLogger(SignController.class);

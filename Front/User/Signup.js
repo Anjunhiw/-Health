@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import {Alert} from "react-native"
 import { useNavigation } from "@react-navigation/native";
@@ -25,14 +25,13 @@ export default function Signup() {
   const [address, setAddress] = useState("");
   const [gender, setGender] = useState(null);
   const [isIdChecked, setIsIdChecked] = useState(false);
-  const [displayValue, setDisplayValue] = useState("");
 
   const navigation = useNavigation();
 //-------------------------------------------------------------------------------------------회원가입
 const handleSignup = async () => {
   //아이디 중복여부 확인
   if (!isIdChecked) {
-    Alert.alert("입력 오류", "아이디 중복 확인을 먼저 해주세요.");
+    Alert.alert("입력 오류", "아이디 중복 확인이 필요합니다.");
     return;
   }
   // 🔹 입력 검증 (우선순위별)
@@ -42,17 +41,8 @@ const handleSignup = async () => {
   } else if (password.length < 8) {
     Alert.alert("입력 오류", "비밀번호는 최소 8자리 이상이어야 합니다.");
     return;
-  } else if (!/[A-Z]/.test(password)) {
-    Alert.alert("입력 오류", "비밀번호에 대문자가 최소 1개 포함되어야 합니다.");
-    return;
-  } else if (!/[a-z]/.test(password)) {
-    Alert.alert("입력 오류", "비밀번호에 소문자가 최소 1개 포함되어야 합니다.");
-    return;
-  } else if (!/[0-9]/.test(password)) {
-    Alert.alert("입력 오류", "비밀번호에 숫자가 최소 1개 포함되어야 합니다.");
-    return;
-  } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    Alert.alert("입력 오류", "비밀번호에 특수문자가 최소 1개 포함되어야 합니다.");
+  } else if (!/[A-Z]/.test(password) && !/[a-z]/.test(password) && !/[0-9]/.test(password) && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    Alert.alert("입력 오류", "비밀번호에 대소문자, 숫자, 특수문자를 모두 포함해 입력해주세요.");
     return;
   } else if (!passwordConfirm.trim()) {
     Alert.alert("입력 오류", "비밀번호 확인란이 비어 있습니다.");

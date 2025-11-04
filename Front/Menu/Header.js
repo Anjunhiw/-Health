@@ -12,12 +12,6 @@ export default function Header() {
             <Text style={styles.logoText}>GymSpot</Text>
             <View style={styles.userContainer}>
                 <Text style={styles.userText}>id 님</Text>
-                <TouchableOpacity 
-                    style={styles.logoutButton} 
-                    onPress={() => navigation.replace("Login")}>
-                    <Image source={require('../assets/logout_icon.png')} 
-                    style={{ width: 20, height: 20 }}/>
-                </TouchableOpacity>
             </View>
         </View>
         </SafeAreaView>

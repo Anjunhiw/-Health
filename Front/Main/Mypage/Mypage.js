@@ -1,20 +1,59 @@
-import { Text, Image, TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
+import { useState } from "react";
+import { Text, Image, TouchableOpacity, View, StyleSheet, ScrollView, TextInput } from "react-native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
+import { useNavigation } from "@react-navigation/native";
 
 export default function My() {
+
+    const [userInfo, setUserInfo] = useState([
+        { label: '이름', key: 'name',  value: '홍길동' },
+        { label: '성별', key: 'gender', value: '남' },
+        { label: '생년월일', key: 'birthdate', value: '1990-01-01' },
+        { label: '연락처',  key: 'contact', value: '010-1234-5678' },
+        { label: '이메일', key: 'email', value: 'ddong@gmail.com' },
+        { label: '주소', key: 'address', value: '경기도 화성시 병점' },
+    ]);
+    const [editingField, setEditingField] = useState(false);
+    const [tempInfo, setTempInfo] = useState(userInfo.map(item => ({ ...item })));
+
+    const navigation = useNavigation();
+
+    function handleSave() {
+        setUserInfo(tempInfo.map(item => ({ ...item })));
+        setEditingField(false);
+    }
+
+    function handleToggleEditSave() {
+        if (editingField) {
+            handleSave();
+        } else {
+            setTempInfo(userInfo.map(item => ({ ...item })));
+            setEditingField(true);
+        }
+    }
+
+    function handleChange(key, text) {
+        const updated = tempInfo.map(item => 
+            item.key === key ? { ...item, value: text } : item
+        );
+        setTempInfo(updated);
+    }
 
     return (
         <View style={styles.container}>
             <Header />
             <ScrollView contentContainerStyle={styles.contentContainer}>
-                {/* 프로필 정보 */}
                 <View style={styles.card}>
                     <View style={styles.cardHeader}>
                         <Text style={styles.cardTitle}>프로필 정보</Text>
-                        <TouchableOpacity>
+
+                        <TouchableOpacity onPress={handleToggleEditSave}>
+                        {editingField ? 
+                            <Text style={{color: '#1E90FF', fontWeight: '600'}}>저장</Text> :
                             <Image source={require('../../assets/pencil.png')} style={styles.editIcon} />
-                        </TouchableOpacity>
+                        }
+                    </TouchableOpacity>
                     </View>
 
                     <View style={styles.profileRow}>
@@ -27,30 +66,30 @@ export default function My() {
                     <View style={styles.divider} />
 
                     <View style={styles.infoList}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>이름</Text>
-                            <Text style={styles.infoValue}>홍길동</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>성별</Text>
-                            <Text style={styles.infoValue}>남</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>생년월일</Text>
-                            <Text style={styles.infoValue}>1990-01-01</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>연락처</Text>
-                            <Text style={styles.infoValue}>010-1234-5678</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>이메일</Text>
-                            <Text style={styles.infoValue}>ddong@gmail.com</Text>
-                        </View>
+                        {userInfo.map((item) => (
+                            <View key={item.label} style={styles.infoRow}>
+                                <Text style={styles.infoLabel}>{item.label}</Text>
+                                {editingField ? (
+                                    ['email', 'address'].includes(item.key) ? (
+                                    <TextInput
+                                    style={styles.input}
+                                    value={tempInfo.find(t => t.key === item.key)?.value || ''}
+                                    onChangeText={(text) => {
+                                        handleChange(item.key, text);
+                                    }}
+                                    />
+                                ) : (
+                                     <Text style={styles.infoValue}>{item.value}</Text>
+                                )
+                                ) : (
+                                    <Text style={styles.infoValue}>{item.value}</Text>
+                                )}
+                            </View>
+                        ))}
                     </View>
+                    <View style={styles.divider} />
                 </View>
 
-                {/* 앱 정보 */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>앱 정보</Text>
                     <View style={styles.infoList}>
@@ -60,8 +99,8 @@ export default function My() {
                     </View>
                 </View>
 
-                {/* 로그아웃 */}
-                <TouchableOpacity style={styles.logoutButton}>
+                <TouchableOpacity style={styles.logoutButton}
+                onPress={() => {navigation.replace("Login")}}>
                     <Text style={styles.logoutText}>로그아웃</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -143,6 +182,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    input: {
+        width: 150,
+        paddingHorizontal: 10,
+        paddingVertical: 3,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
     infoLabel: {
         fontSize: 15,
         color: '#555',
@@ -161,14 +207,27 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     logoutButton: {
-        backgroundColor: '#ff4d4f',
         paddingVertical: 12,
+        borderColor: 'red',
+        borderWidth: 1,
         borderRadius: 10,
         alignItems: 'center',
     },
     logoutText: {
         fontSize: 16,
-        color: '#fff',
+        color: 'red',
+        fontWeight: '600',
+    },
+    passwordChangeButton: {
+        paddingVertical: 8,
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        marginTop: 10,
+    },
+    passwordChangeText: {
+        fontSize: 15,
+        color: '#333',
         fontWeight: '600',
     },
 });
