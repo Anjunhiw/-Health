@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Text, View, TextInput, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
+import axios from "axios";
+import { Alert } from "react-native";
 
 export default function Login() {
   const [ id, setId ] = useState('');
@@ -9,6 +11,34 @@ export default function Login() {
   const [ isChecked, setChecked ] = useState(false);
 
   const navigation = useNavigation();
+
+  const handleLogin = async () => {
+    if (!id.trim() || !password.trim()) {
+      Alert.alert("입력 오류", "아이디와 비밀번호를 모두 입력해주세요.");
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://192.168.219.202:8080/login", {
+        user_id: id,
+        password: password,
+      });
+
+      console.log("로그인 응답:", res.data);
+
+      if (res.data.success) {
+        Alert.alert("로그인 성공", `${res.data.name}님 환영합니다!`);
+        navigation.replace("Home");  // ✅ 성공 시 이동
+      } else {
+        Alert.alert("로그인 실패", res.data.message || "아이디 또는 비밀번호가 올바르지 않습니다.");
+      }
+
+    } catch (err) {
+      console.error("로그인 오류:", err);
+      Alert.alert("오류", "서버 연결에 실패했습니다. 네트워크 또는 백엔드를 확인하세요.");
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -48,9 +78,11 @@ export default function Login() {
         </View>
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.loginButton} onPress={() => {navigation.replace("Home")}}>
-          <Text style={styles.loginButtonText}>로그인</Text>
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>로그인</Text>
+          </TouchableOpacity>
          <View>
         <TouchableOpacity style={styles.signupButton}
         onPress={() => {navigation.replace("Signup")}}>

@@ -74,7 +74,7 @@ const handleSignup = async () => {
     return;
   }
   try {
-    const response = await axios.post("http://192.168.219.101:8080/signup", {
+    const response = await axios.post("http://192.168.219.202:8080/signup", {
       user_id: userId,
       password: password,
       name: name,
@@ -108,7 +108,7 @@ const handleCheckId = async () => {
     return;
   }
   try {
-    const response = await axios.get(`http://192.168.219.101:8080/check-id/${userId}`); 
+    const response = await axios.get(`http://192.168.219.202:8080/check-id/${userId}`); 
     console.log("데이터:", response.data);
     if (response.data.exists) {  
       Alert.alert("중복된 아이디", "이미 존재하는 아이디입니다.");
