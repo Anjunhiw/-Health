@@ -1,14 +1,18 @@
-import { useState, useEffect } from "react"; 
+import { useState, useEffect } from "react";
 import { Text, View, Button, TextInput, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
 
-// Google 인증을 위한 라이브러리 임포트
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
+// Google 인증을 위한 라이브러리 임포트 (수정됨)
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-// WebBrowser가 인증 세션
-WebBrowser.maybeCompleteAuthSession();
+// 서버 통신을 위한 axios 임포트
+import axios from 'axios'; 
+// import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 저장을 위해 필요
+
+// --- (추가) 스프링 서버 주소 ---
+// (반드시 본인의 Spring Boot 서버 IP와 포트로 변경하세요)
+const SPRING_SERVER_URL = 'http://192.168.219.101:8080';
 
 export default function Login() {
   const [id, setId] = useState('');
@@ -16,44 +20,97 @@ export default function Login() {
   const [isChecked, setChecked] = useState(false);
   const navigation = useNavigation();
 
-  // Google useAuthRequest 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: '927294612895-b9kfno3sq4m00dul44l9kg3lsjbrc6d5.apps.googleusercontent.com',
-    // iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
-    // androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
-  });
+  // 구글 로그인 에러 상태 추가
+  const [googleError, setGoogleError] = useState(null);
 
-  // Google 로그인 응답(response) 처리
+  // --- (수정됨) Google Sign-In 설정 ---
+  // 컴포넌트 마운트 시 1회 실행하여 Google Sign-In을 설정합니다.
   useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      // authentication.accessToken
-      getUserInfo(authentication.accessToken);
-    } else if (response?.type === 'error') {
-      console.log("Google Auth Error:", response.error);
-      // 로그인 실패 또는 취소
-    }
-  }, [response]);
+    GoogleSignin.configure({
+      // webClientId는 Google Cloud Console에서 'Web application' 타입으로 생성한 Client ID입니다.
+      // 기존 expoClientId와 동일한 값을 사용합니다.
+      webClientId: '927294612895-b9kfno3sq4m00dul44l9kg3lsjbrc6d5.apps.googleusercontent.com',
+      // androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
+      // iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
+    });
+  }, []);
 
-  // Access Token Google 사용자 정보 
-  const getUserInfo = async (token) => {
+  // --- (신규) idToken을 스프링 서버로 전송하는 함수 ---
+  const sendTokenToServer = async (idToken) => {
     try {
-      const response = await fetch(
-        'https://www.googleapis.com/userinfo/v2/me',
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const user = await response.json();
-      console.log('Google User Info:', user);
-      // user.email, user.name, user.picture 등으로 앱의 로그인 처리
+      setGoogleError('서버와 통신 중...');
+      
+      // Spring Boot 서버의 '/auth/google' 엔드포인트로 idToken을 전송합니다.
+      const response = await axios.post(`${SPRING_SERVER_URL}/auth/google`, {
+        idToken: idToken,
+      });
 
-      navigation.replace("Home");
+      // 서버로부터 앱 전용 JWT(access_token)를 받음
+      const { access_token } = response.data; 
+
+      if (access_token) {
+        // (중요) 서버가 발급한 JWT를 AsyncStorage 등에 저장해야 합니다.
+        // await AsyncStorage.setItem('userToken', access_token);
+        
+        setGoogleError(null);
+        console.log('스프링 서버 로그인 성공! JWT:', access_token);
+
+        // 서버 로그인이 최종 성공하면 Home으로 이동
+        navigation.replace("Home");
+
+      } else {
+        setGoogleError('서버로부터 토큰을 받지 못했습니다.');
+      }
 
     } catch (error) {
-      console.log("Error fetching user info:", error);
+      console.error('서버 통신 오류:', error);
+      if (error.response) {
+        // 서버가 에러 응답을 보낸 경우
+        setGoogleError(`서버 오류: ${error.response.data?.message || error.message}`);
+      } else {
+        // 네트워크 오류 등
+        setGoogleError(`서버 연결 실패: ${error.message}`);
+      }
     }
   };
+
+
+  // --- (수정됨) 새 Google 로그인 함수 ---
+  const signIn = async () => {
+    try {
+      // 1. 구글 플레이 서비스가 기기에서 사용 가능한지 확인
+      await GoogleSignin.hasPlayServices();
+      
+      // 2. 로그인 시도 및 사용자 정보 획득
+      const user = await GoogleSignin.signIn();
+      
+      // 3. 획득한 사용자 정보 콘솔에 출력
+      setGoogleError(null);
+      console.log('Google User Info:', user);
+      
+      const idToken = user.idToken; // <-- 이 토큰을 서버로 보냅니다.
+
+      if (idToken) {
+        // 4. (수정) Home으로 바로 이동하는 대신, 서버로 토큰 전송
+        await sendTokenToServer(idToken);
+      } else {
+        setGoogleError('구글로부터 idToken을 받지 못했습니다.');
+      }
+
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        setGoogleError('로그인 취소됨');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        setGoogleError('로그인 진행 중');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setGoogleError('구글 플레이 서비스를 사용할 수 없습니다');
+      } else {
+        setGoogleError(`로그인 실패: ${error.message}`);
+        console.error(error);
+      }
+    }
+  };
+  // --- 기존 'useEffect([response])' 및 'getUserInfo' 함수는 삭제 ---
 
   return (
     <KeyboardAvoidingView
@@ -109,17 +166,17 @@ export default function Login() {
         <View style={styles.line} />
       </View>
       <View>
-        {/*Google 버튼에 onPress 및 disabled 속성 추가 */}
+        {/* --- (수정됨) Google 버튼 --- */}
         <TouchableOpacity
           style={styles.googleButton}
-          disabled={!request} // Google 인증 준비가 안됐으면 버튼 비활성화
-          onPress={() => {
-            promptAsync(); // Google 로그인 창 띄우기
-          }}
+          onPress={signIn} // 'promptAsync' 대신 'signIn' 함수 호출
         >
           <Image source={require('../assets/google.png')} style={{ width: 24, height: 24 }} />
           <Text>Google로 시작하기</Text>
         </TouchableOpacity>
+        
+        {/* 구글 로그인 에러 메시지 표시 */}
+        {googleError && <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>오류: {googleError}</Text>}
       </View>
     </KeyboardAvoidingView>
   );
@@ -226,3 +283,4 @@ const styles = StyleSheet.create({
   }
 
 });
+

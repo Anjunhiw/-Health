@@ -28,7 +28,7 @@ export default function Signup() {
 
 const handleSignup = async () => {
   try {
-    const response = await axios.post("http://192.168.219.101:8080/signup", {
+    const response = await axios.post("http://192.168.1.194:8080/signup", {
       user_id: userId,         // 아이디
       password: password,      // 비밀번호
       name: name,              // 이름
