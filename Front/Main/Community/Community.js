@@ -1,14 +1,32 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
+import axios from "axios";
 
 export default function Community() {
 
     const [selectedTag, setSelectedTag] = useState('전체');
-    const navigation = useNavigation();
+    const [posts, setPosts] = useState([]);     // 게시글 리스트
+    const [loading, setLoading] = useState(true); // 로딩 상태
     const tags = ['전체', '정보', '식단', '할인', '운동인증', '후기'];
+    const navigation = useNavigation();
+
+    
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const response = await axios.get("http://192.168.219.101:8080/community/list");
+                setPosts(response.data);
+            } catch (error) {
+                console.error("❌ 게시글 불러오기 실패:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPosts();
+    }, []);
 
     return(
         <View style={styles.container}>
@@ -32,15 +50,29 @@ export default function Community() {
 
                 <View style={styles.divider} />
 
+                {/* ✅ 게시글 출력 구간 */}
                 <View style={styles.listContainer}>
-                    {/* 게시글 목록이 여기에 표시됩니다. */}
-                    <Text style={styles.placeholderText}>게시글이 없습니다.</Text>
+                    {loading ? (
+                        <Text>불러오는 중...</Text>
+                    ) : posts.length === 0 ? (
+                        <Text style={styles.placeholderText}>게시글이 없습니다.</Text>
+                    ) : (
+                        posts.map((post, index) => (
+                            <View key={index} style={styles.postCard}>
+                                <Text style={styles.postTitle}>{post.title}</Text>
+                                <Text style={styles.postContent} numberOfLines={2}>
+                                    {post.content}
+                                </Text>
+                            </View>
+                        ))
+                    )}
                 </View>
-
             </ScrollView>
+
             <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("Write")}>
                 <Text style={styles.addButtonText}>+</Text>
             </TouchableOpacity>
+
             <Tab />
         </View>
     )
@@ -120,8 +152,7 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'stretch'
     },
     placeholderText: {
         fontSize: 16,

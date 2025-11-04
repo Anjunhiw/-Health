@@ -19,7 +19,7 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post("http://192.168.219.202:8080/login", {
+      const res = await axios.post("http://192.168.219.101:8080/login", {
         user_id: id,
         password: password,
       });
