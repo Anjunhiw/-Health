@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import {Alert} from "react-native"
+import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   TextInput,
@@ -8,9 +8,10 @@ import {
   View,
   Button,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
+  ScrollView,
+  Platform,
+  StatusBar,
 } from "react-native";
 
 
@@ -124,19 +125,21 @@ const handleCheckId = async () => {
 };
 
 return (
-    <KeyboardAvoidingView
+    <ScrollView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      maximumFontSizeMultiplier={1}
     >
+      {/* <View style={styles.formContainer}> */}
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>GymSpot</Text>
       </View>
-
-      <View style={styles.inputContainer}>
-        <View style={{ flexDirection: "row" }}>
+      
+        <View style={styles.inputRow}>
         <TextInput
           placeholder="아이디"
-          style={[styles.contactInput, { width: 255 }]}
+          style={[styles.input, { flex: 1 }]}
           value={userId}
           onChangeText={(text) => {
             if (text !== userId) {
@@ -145,13 +148,13 @@ return (
             setUserId(text);
           }}
         />
-        <TouchableOpacity style={styles.contactButton} onPress={handleCheckId}>
+        <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]} onPress={handleCheckId}>
           <Text style={styles.contactButtonText}>중복 확인</Text>
         </TouchableOpacity>
         </View>
         <TextInput
           placeholder="비밀번호 (특수문자 포함, 8자 이상)"
-          style={styles.input}
+          style={styles.fullWidthInput}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -159,43 +162,43 @@ return (
 {/* <Text>{displayValue}</Text>   콘솔 확인용 잠시    */}
         <TextInput
           placeholder="비밀번호 확인"
-          style={styles.input}
+          style={styles.fullWidthInput}
           secureTextEntry
           value={passwordConfirm}
           onChangeText={setPasswordConfirm}
         />
-        <View style={{ flexDirection: "row", gap: 15}}>
+        <View style={[styles.inputRow, { gap: 10 }]}>
         <TextInput
           placeholder="이름"
-          style={[styles.input, { width: 150 }]}
+          style={[styles.input, { flex: 1 }]}
           value={name}
           onChangeText={setName}
         />
           <TextInput
-          placeholder="생년월일 ex)19900101"
-          style={[styles.input, { width: 165 }]}
+          placeholder="생년월일(19900101)"
+          style={[styles.input, { flex: 1 }]}
           value={birthdate}
           onChangeText={setBirthdate}
           maxLength={8}
           keyboardType="number-pad"
         />
         </View>
-        <View style={{ flexDirection: "row" }}>
+        <View style={styles.inputRow}>
           <TextInput
             placeholder="연락처"
-            style={styles.contactInput}
+            style={[styles.input, { flex: 1 }]}
             value={contact}
             onChangeText={setContact}
             keyboardType="phone-pad"
           />
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]}>
             <Text style={styles.contactButtonText}>인증</Text>
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row" }}>
           <TextInput
             placeholder="이메일"
-            style={styles.input}
+            style={styles.fullWidthInput}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -206,7 +209,7 @@ return (
         </View>
         <TextInput
           placeholder="주소"
-          style={styles.input}
+          style={styles.fullWidthInput}
           value={address}
           onChangeText={setAddress}
         />
@@ -239,28 +242,38 @@ return (
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-
+      
       <View style={styles.buttonContainer}>
        <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
   <Text style={styles.signupButtonText}>회원가입</Text>
 </TouchableOpacity>
-
       </View>
+      {/* </View> */}
 
       <View style={styles.loginContainer}>
         <Text>계정이 있으신가요?</Text>
-        <Button title="로그인" onPress={() => {navigation.replace("Login")}} color="#1E90FF" />
+        <TouchableOpacity 
+        style={styles.loginButton}
+        onPress={() => navigation.replace("Login")}>
+          <Text style={styles.loginButtonText}> 로그인</Text>
+        </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: "#fff", // 배경색 추가
+  },
+  contentContainer: {
+    flexGrow: 1,
     justifyContent: "center",
+    padding: 20,
+  },
+  formContainer: {
+    // paddingHorizontal: 20,
   },
   logoContainer: {
     alignItems: "center",
@@ -271,30 +284,30 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1E90FF",
   },
-  inputContainer: {
-    marginBottom: 20,
-    alignItems: "center",
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
-   contactInput: {
-  width: 280,      
-  backgroundColor: "#fff",
-  paddingHorizontal: 15,
-  paddingVertical: 12,
-  borderRadius: 8,
-  marginBottom: 10,
-  borderWidth: 1,
-  borderColor: "#ccc",
-  marginRight: 9,
-},
   input: {
-    width: 330,
     backgroundColor: "#fff",
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 8,
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#ccc",
+    minHeight: 48,
+  },
+  fullWidthInput: {
+    width: '100%',
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    minHeight: 48,
   },
   contactButton: {
     borderColor: '#1E90FF',
@@ -303,8 +316,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    paddingHorizontal: 9,
-    height: 40,
+    paddingHorizontal: 12,
+    height: 48,
   },
   contactButtonText: {
     fontSize: 14,
@@ -317,10 +330,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginVertical: 10,
+    gap: 20,
   },
   genderButton: {
-    width: 150,
-    marginHorizontal: 15,
+    flex: 1,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
@@ -350,13 +363,20 @@ const styles = StyleSheet.create({
   loginContainer: {
     alignItems: "center",
   },
+  loginButton: {
+    marginTop: 10,
+    backgroundColor: Platform.OS === 'ios' ? '#fff' : '#fff',
+  },
+  loginButtonText: {
+    color: Platform.OS === 'ios' ? '#1E90FF' : '#1E90FF',
+  },
   signupButton: {
   backgroundColor: '#1E90FF',
   paddingVertical: 12,
   borderRadius: 8,
   alignItems: 'center',
   justifyContent: 'center',
-  width: 330,
+  width: '100%',
 },
 signupButtonText: {
   color: '#fff',
@@ -365,4 +385,3 @@ signupButtonText: {
 },
 
 });
-

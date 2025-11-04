@@ -20,9 +20,13 @@ import com.example.demo.Service.UserService;
 
 @RestController
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 @CrossOrigin(origins = "http://192.168.219.102:8081")
 =======
 @CrossOrigin(origins = "http://10.42.56.241:8081")
+>>>>>>> Stashed changes
+=======
+@CrossOrigin(origins = "http://192.168.219.213:8081")
 >>>>>>> Stashed changes
 public class SignController {
 
