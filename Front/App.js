@@ -8,6 +8,7 @@ import Pw from "./User/Find/Pw";
 import Home from "./Main/Home/Home";
 import Community from "./Main/Community/Community";
 import Write from "./Main/Community/Write";
+import Detail from "./Main/Community/Detail";
 import Event from "./Main/Event/Event";
 import Wishlist from "./Main/Wishlist/Wishlist";
 import My from "./Main/Mypage/Mypage";
@@ -26,6 +27,7 @@ export default function App() {
         <Stack.Screen name="Home" component={Home} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Community" component={Community} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Write" component={Write} options={{headerShown: false, animation: 'simple_push'}}/>
+        <Stack.Screen name="Detail" component={Detail} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Event" component={Event} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Wishlist" component={Wishlist} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="My" component={My} options={{headerShown: false, animation: 'simple_push'}}/>
