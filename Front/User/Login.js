@@ -14,10 +14,13 @@ import axios from 'axios';
 // --- (추가) 스프링 서버 주소 ---
 // (반드시 본인의 Spring Boot 서버 IP와 포트로 변경하세요)
 const apiExtra = (Constants.expoConfig && Constants.expoConfig.extra && Constants.expoConfig.extra.api) || {};
-const API_BASE = Platform.OS === 'android'
-  ? (Constants.isDevice ? (apiExtra.androidDevice || 'http://192.168.45.250:8080') : (apiExtra.androidEmulator || 'http://10.0.2.2:8080'))
-  : (Constants.isDevice ? (apiExtra.iosDevice || 'http://192.168.45.250:8080') : (apiExtra.iosSimulator || 'http://localhost:8080'));
-
+const API_BASE =
+  Platform.OS === 'android'
+    ? (apiExtra.androidDevice || 'http://10.125.47.4:8080')   // 실제 폰이든 개발 세션이든 항상 이 값 사용
+    : (Constants.isDevice
+        ? (apiExtra.iosDevice || 'http://10.125.47.4:8080')
+        : (apiExtra.iosSimulator || 'http://localhost:8080'));
+console.log('API_BASE =>', API_BASE);
 export default function Login() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
