@@ -1,7 +1,8 @@
 import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-export default function pw() {
+// export default function id() -> export default function FindId()
+export default function FindId() {
 
     const navigation = useNavigation();
 
@@ -11,15 +12,16 @@ export default function pw() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.contentContainer}>
-         <View style={styles.logoContainer}>
-                        <Text style={styles.logoText}>GymSpot</Text>
-                      </View>
+        <View style={styles.logoContainer}>
+                <Text style={styles.logoText}>GymSpot</Text>
+              </View>
         <View style={styles.titleContainer}>
-          <TouchableOpacity onPress={() => navigation.replace('Id')}>
-            <Text style={styles.text}>아이디 찾기</Text>
-          </TouchableOpacity>
+          <Text style={[styles.text, styles.activeText]}>아이디 찾기</Text>
           <Text>|</Text>
-          <Text style={[styles.text, styles.activeText]}>비밀번호 찾기</Text>
+          {/* 'Pw' -> 'FindPw'로 변경 (나중에 네비게이션도 수정해야 함) */}
+          <TouchableOpacity onPress={() => navigation.replace('FindPw')}> 
+            <Text style={styles.text}>비밀번호 찾기</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -28,13 +30,13 @@ export default function pw() {
             keyboardType="phone-pad"
           />
            <TouchableOpacity style={styles.contactButton}>
-             <Text style={styles.contactButtonText}>인증</Text>
+                <Text style={styles.contactButtonText}>인증</Text>
             </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>비밀번호 재설정</Text>
+          <Text style={styles.buttonText}>아이디 찾기</Text>
         </TouchableOpacity>
-         <View style={{ alignItems: 'center', marginTop: 20 }}>
+        <View style={{ alignItems: 'center', marginTop: 20 }}>
             <TouchableOpacity onPress={() => {navigation.replace("Login")}}>
                 <Text>로그인</Text>
             </TouchableOpacity>
@@ -44,6 +46,7 @@ export default function pw() {
     )
 }
 
+// ... (스타일 코드는 동일)
 const styles = StyleSheet.create({
     container: {
     flex: 1,
@@ -63,7 +66,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1E90FF",
   },
-  titleContainer: {
+   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -82,7 +85,7 @@ const styles = StyleSheet.create({
     color: '#007AFF', // 활성화 색상
     fontWeight: 'bold',
   },
-    inputContainer: {
+  inputContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,

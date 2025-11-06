@@ -22,14 +22,24 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.GymSpot"
+      "package": "com.anonymous.GymSpot",
+      "usesCleartextTraffic": true 
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "jsEngine": "hermes"
     },
     "plugins": [
+      "expo-dev-client",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "api": {
+        "androidEmulator": "http://10.0.2.2:8080",
+        "androidDevice": "http://192.168.219.101:8080",
+        "iosSimulator": "http://localhost:8080",
+        "iosDevice": "http://192.168.219.101:8080"
+      }
+    }
   }
 }

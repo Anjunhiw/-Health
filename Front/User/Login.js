@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Text, View, Button, TextInput, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
+import Constants from 'expo-constants';
 import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
 
@@ -12,7 +13,10 @@ import axios from 'axios';
 
 // --- (추가) 스프링 서버 주소 ---
 // (반드시 본인의 Spring Boot 서버 IP와 포트로 변경하세요)
-const SPRING_SERVER_URL = 'http://192.168.219.101:8080';
+const apiExtra = (Constants.expoConfig && Constants.expoConfig.extra && Constants.expoConfig.extra.api) || {};
+const API_BASE = Platform.OS === 'android'
+  ? (Constants.isDevice ? (apiExtra.androidDevice || 'http://192.168.45.250:8080') : (apiExtra.androidEmulator || 'http://10.0.2.2:8080'))
+  : (Constants.isDevice ? (apiExtra.iosDevice || 'http://192.168.45.250:8080') : (apiExtra.iosSimulator || 'http://localhost:8080'));
 
 export default function Login() {
   const [id, setId] = useState('');
@@ -30,7 +34,7 @@ export default function Login() {
       // webClientId는 Google Cloud Console에서 'Web application' 타입으로 생성한 Client ID입니다.
       // 기존 expoClientId와 동일한 값을 사용합니다.
       webClientId: '927294612895-b9kfno3sq4m00dul44l9kg3lsjbrc6d5.apps.googleusercontent.com',
-      // androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
+      // androidClientId: '927294612895-bq30q934iifl86qc6vacgkcedvbvq9d1.apps.googleusercontent.com', // 스토어 출시용
       // iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
     });
   }, []);
@@ -41,7 +45,7 @@ export default function Login() {
       setGoogleError('서버와 통신 중...');
       
       // Spring Boot 서버의 '/auth/google' 엔드포인트로 idToken을 전송합니다.
-      const response = await axios.post(`${SPRING_SERVER_URL}/auth/google`, {
+      const response = await axios.post(`${API_BASE}/auth/google`, {
         idToken: idToken,
       });
 
@@ -88,7 +92,7 @@ export default function Login() {
       setGoogleError(null);
       console.log('Google User Info:', user);
       
-      const idToken = user.idToken; // <-- 이 토큰을 서버로 보냅니다.
+      const idToken = user.data.idToken; // <-- 이 토큰을 서버로 보냅니다.
 
       if (idToken) {
         // 4. (수정) Home으로 바로 이동하는 대신, 서버로 토큰 전송
@@ -144,7 +148,7 @@ export default function Login() {
           <Text>자동 로그인</Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity onPress={() => { navigation.replace("Id") }}>
+          <TouchableOpacity onPress={() => { navigation.replace("FindId") }}>
             <Text style={styles.findButtonText}>아이디 / 비밀번호 찾기</Text>
           </TouchableOpacity>
         </View>

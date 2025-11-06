@@ -3,8 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Login from "./User/Login";
 import Signup from "./User/Signup";
-import Id from "./User/Find/Id";
-import Pw from "./User/Find/Pw";
+import Id from "./User/Find/FindId";
+import Pw from "./User/Find/FindPw";
 import Home from "./Main/Home/Home";
 import Community from "./Main/Community/Community";
 import Event from "./Main/Event/Event";
