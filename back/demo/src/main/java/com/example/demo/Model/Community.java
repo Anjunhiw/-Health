@@ -4,6 +4,7 @@ public class Community {
     private int id;            // 게시글 번호
     private String title;      // 제목
     private String content;    // 내용
+    private String category;  // 카테고리 필드 추가
 	public int getId() {
 		return id;
 	}
@@ -22,9 +23,15 @@ public class Community {
 	public void setContent(String content) {
 		this.content = content;
 	}
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
 	@Override
 	public String toString() {
-		return "Community [id=" + id + ", title=" + title + ", content=" + content + "]";
+		return "Community [id=" + id + ", title=" + title + ", content=" + content + ", category=" + category + "]";
 	}
 
 

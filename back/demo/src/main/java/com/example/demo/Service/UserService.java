@@ -30,6 +30,9 @@ public class UserService {
 	public boolean existsByUserId(String userId) {
 	    return userMapper.existsByUserId(userId) > 0;
 	}
-	
+	//마이페이지 수정
+	public int updateUser(String userId, User updatedUser) {
+	    return userMapper.updateUser(userId, updatedUser);
+	}
 	
 }

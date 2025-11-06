@@ -1,6 +1,7 @@
 package com.example.demo.Model;
 
 public class User {
+	private int id;
 	private String user_id;
 	private String password;
 	private String name;
@@ -10,6 +11,13 @@ public class User {
 	private String address;
 	private String gender;
 	
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
 	public String getUser_id() {
 	return user_id;
 	}
@@ -60,7 +68,7 @@ public class User {
 	}
 	@Override
 	public String toString() {
-		return "User [user_id=" + user_id + ", password=" + password + ", name=" + name + ", contact=" + contact
+		return "User [Id=" + id + ",user_id=" + user_id + ", password=" + password + ", name=" + name + ", contact=" + contact
 				+ ", email=" + email + ", birthdate=" + birthdate + ", address=" + address + "]";
 	}
 	

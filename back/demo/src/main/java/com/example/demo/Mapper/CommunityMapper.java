@@ -10,6 +10,5 @@ import com.example.demo.Model.Community;
 @Mapper
 public interface CommunityMapper {
     void insertCommunity(Community community);
-@Select("SELECT id, title, content FROM community ORDER BY id DESC")
-    List<Community> selectAllCommunity();
+    List<Community> selectAllCommunity(); // 게시글 전체 조회 추가
 }

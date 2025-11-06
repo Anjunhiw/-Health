@@ -6,8 +6,15 @@
 
     <!-- 게시글 등록 -->
     <insert id="insertCommunity" parameterType="com.example.demo.Model.Community">
-        INSERT INTO community (title, content)
-        VALUES (#{title}, #{content});
+        INSERT INTO community (title, content, category)
+        VALUES (#{title}, #{content}, #{category});
     </insert>
 
+	<!-- 게시글 조회 -->
+    <select id="selectAllCommunity" resultType="com.example.demo.Model.Community">
+        SELECT id, title, content, category, created_at
+        FROM community
+        ORDER BY id DESC;
+    </select>
+    
 </mapper>

@@ -5,13 +5,16 @@ import Tab from "../../Menu/Bottom_Tab";
 import React, { useState } from "react";
 import axios from "axios";
 import { Alert } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
+//--------------------------------------------------------------             npm install react-native-picker-select 설치해야함
 export default function Write() {
 
     const navigation = useNavigation();
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    
+    const [selectedTag, setSelectedTag] = useState(null);
+
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim()) {
             Alert.alert("오류", "제목과 내용을 모두 입력해주세요!");
@@ -22,7 +25,8 @@ export default function Write() {
             const response = await axios.post("http://192.168.219.101:8080/write", {
                 title: title,
                 content: content,
-                writer: "user01"
+                writer: "user01",
+                category: selectedTag || "전체",
             });
 
             if (response.status === 200) {
@@ -47,8 +51,29 @@ export default function Write() {
         <View style={styles.container}>
             <Header />
             
-            <View style={styles.content}>
+             <View style={styles.content}>
+            {/* ✅ 제목 + 드롭다운을 한 줄에 가로 배치 */}
+            <View style={styles.headerRow}>
                 <Text style={styles.title}>게시글 작성</Text>
+
+                {/* ✅ 여기에 드롭다운 추가 */}
+                <RNPickerSelect
+                    onValueChange={(value) => setSelectedTag(value)}
+                    items={[
+                        { label: '전체', value: '전체' },
+                        { label: '정보', value: '정보' },
+                        { label: '식단', value: '식단' },
+                        { label: '할인', value: '할인' },
+                        { label: '운동인증', value: '운동인증' },
+                        { label: '후기', value: '후기' },
+                    ]}
+                    placeholder={{ label: '카테고리 선택', value: null }}
+                    style={{
+                        inputIOS: styles.dropdown,
+                        inputAndroid: styles.dropdown,
+                    }}
+                />
+            </View>
 
                 <TextInput
                     style={styles.input}
@@ -115,5 +140,22 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: '600',
+    },
+    headerRow: {
+    flexDirection: 'row',        // 가로로 배치
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    },
+    dropdown: {
+        fontSize: 16,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        color: '#333',
+        backgroundColor: '#f9f9f9',
+        width: 150,
     },
 });

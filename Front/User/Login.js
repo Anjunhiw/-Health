@@ -4,12 +4,12 @@ import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
 import axios from "axios";
 import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 export default function Login() {
   const [ id, setId ] = useState('');
   const [ password, setPassword ] = useState('');
   const [ isChecked, setChecked ] = useState(false);
-
   const navigation = useNavigation();
 
   const handleLogin = async () => {
@@ -27,8 +27,12 @@ export default function Login() {
       console.log("로그인 응답:", res.data);
 
       if (res.data.success) {
+        // ✅ 로그인 성공 시 user_id를 저장 (My.js에서 불러올 수 있게)
+        await AsyncStorage.setItem("user_id", id);
+        await AsyncStorage.setItem("user_name", res.data.name);
+
         Alert.alert("로그인 성공", `${res.data.name}님 환영합니다!`);
-        navigation.replace("Home");  // ✅ 성공 시 이동
+        navigation.replace("Home"); // ✅ Home 페이지로 이동
       } else {
         Alert.alert("로그인 실패", res.data.message || "아이디 또는 비밀번호가 올바르지 않습니다.");
       }

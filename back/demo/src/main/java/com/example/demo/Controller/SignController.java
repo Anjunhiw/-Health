@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,19 +23,14 @@ import com.example.demo.Service.UserService;
 import com.example.demo.Service.CommunityService;
 
 @RestController
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-@CrossOrigin(origins = "http://192.168.219.102:8081")
-=======
-@CrossOrigin(origins = "http://10.42.56.241:8081")
->>>>>>> Stashed changes
-=======
-@CrossOrigin(origins = "http://192.168.219.213:8081")
->>>>>>> Stashed changes
-=======
-@CrossOrigin(origins = "http://192.168.219.202:8081")
->>>>>>> Stashed changes
+//@CrossOrigin(origins = "http://192.168.219.202:8081")
+//---------------------------------------------------------   테스트중 주 아래다가 추가해 써보도록 안되면 위에꺼 교체해서 사용                            
+@CrossOrigin(origins = {
+	    "http://192.168.219.101:8081",
+	    "http://192.168.219.202:8081",
+	    "http://localhost:8081"
+	})
+
 public class SignController {
 
     private static final Logger logger = LoggerFactory.getLogger(SignController.class);
@@ -79,6 +75,7 @@ public class SignController {
         if (user != null && user.getPassword().trim().equals(password.trim())) {
             response.put("success", true);
             response.put("name", user.getName());
+            response.put("user_id", user.getUser_id());
             logger.info("로그인 성공: {}", user.getName());
         } else {
             response.put("success", false);
@@ -118,8 +115,45 @@ public class SignController {
         return ResponseEntity.ok(list);
     }
     
-    
-    
-    
+    // 사용자 정보 조회------------------------------------------------------------------------------------------
+    @GetMapping("/users/info/{userId}")
+    public ResponseEntity<User> getUserInfo(@PathVariable("userId") String userId) {
+        logger.info("👤 [사용자 정보 요청] userId: {}", userId);
+
+        User user = userService.findByUserId(userId);
+
+        if (user != null) {
+            logger.info("✅ [조회 성공] {}", user);
+            return ResponseEntity.ok(user);
+        } else {
+            logger.warn("❌ [조회 실패] 사용자 없음: {}", userId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    //마이페이지 수정------------------------------------------------------------------------------------------------
+    @PutMapping("/users/update/{userId}")
+    public ResponseEntity<String> updateUser(
+            @PathVariable("userId") String userId,
+            @RequestBody User updatedUser) {
+
+        logger.info("✏️ [사용자 정보 수정 요청] ID: {}", userId);
+        logger.info("📦 수정 데이터: {}", updatedUser);
+
+        try {
+            int result = userService.updateUser(userId, updatedUser);
+
+            if (result > 0) {
+                logger.info("✅ [수정 성공] {}", userId);
+                return ResponseEntity.ok("정보가 수정되었습니다.");
+            } else {
+                logger.warn("⚠️ [수정 실패] {}", userId);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("수정 실패");
+            }
+
+        } catch (Exception e) {
+            logger.error("🔥 [수정 중 오류 발생]: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류");
+        }
+    }
     
 }

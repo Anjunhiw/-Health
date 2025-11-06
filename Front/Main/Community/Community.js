@@ -57,14 +57,23 @@ export default function Community() {
                     ) : posts.length === 0 ? (
                         <Text style={styles.placeholderText}>게시글이 없습니다.</Text>
                     ) : (
-                        posts.map((post, index) => (
-                            <View key={index} style={styles.postCard}>
-                                <Text style={styles.postTitle}>{post.title}</Text>
-                                <Text style={styles.postContent} numberOfLines={2}>
-                                    {post.content}
-                                </Text>
-                            </View>
-                        ))
+                        posts
+                            // ✅ 선택된 카테고리가 "전체"가 아니면 해당 카테고리만 필터링
+                            .filter(post => selectedTag === '전체' || post.category === selectedTag)
+                            .map((post, index) => (
+                                <View key={index} style={styles.postCard}>
+                                    {/* ✅ 제목과 내용을 가로로 배치 */}
+                                    <View style={styles.rowContainer}>
+                                        <Text style={styles.postTitle}>{post.title}</Text>
+                                        <Text style={styles.postContent} numberOfLines={1}>
+                                            {post.content}
+                                        </Text>
+                                    </View>
+
+                                    {/* ✅ 카테고리 표시 */}
+                                    <Text style={styles.categoryLabel}># {post.category}</Text>
+                                </View>
+                            ))
                     )}
                 </View>
             </ScrollView>
@@ -150,12 +159,28 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
     },
-    listContainer: {
-        flex: 1,
-        alignItems: 'stretch'
-    },
-    placeholderText: {
-        fontSize: 16,
-        color: '#999',
-    },
+rowContainer: {
+    flexDirection: 'row',           // 👉 제목 / 내용 가로 배치
+    alignItems: 'center',
+    justifyContent: 'space-between',// 👉 좌우 정렬
+},
+
+postTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,                        // 👉 제목이 일정 공간 차지
+    marginRight: 10,                // 👉 내용과 간격
+},
+
+postContent: {
+    flex: 2,                        // 👉 내용이 더 넓게
+    fontSize: 14,
+    color: '#555',
+},
+categoryLabel: {
+    marginTop: 1,
+    fontSize: 10,
+    color: '#1E90FF',
+    alignSelf: 'flex-end',
+},
 });

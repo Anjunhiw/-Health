@@ -5,21 +5,27 @@
     <!-- 회원가입 -->
     <insert id="InsertUser" parameterType="com.example.demo.Model.User">
         INSERT INTO users (user_id, password, name, contact, email, birthdate, address, gender)
-        VALUES (#{user_id}, #{password}, #{name}, #{contact}, #{email}, #{birthdate}, #{address}, #{gender})
+        VALUES (#{user_id}, #{password}, #{name}, #{contact}, #{email}, #{birthdate}, #{address}, #{gender});
     </insert>
     
     <!-- 전체 사용자 조회 -->
     <select id="SelectUser" resultType="com.example.demo.Model.User">
-        SELECT user_id, password, name, contact, email, birthdate, address, gender FROM users
+        SELECT user_id, password, name, contact, email, birthdate, address, gender FROM users;
     </select>
     
     <!-- user_id로 사용자 조회 -->
     <select id="findByUserId" resultType="com.example.demo.Model.User" parameterType="java.lang.String">
-    	SELECT * FROM users WHERE user_id = #{userId}
+    	SELECT * FROM users WHERE user_id = #{userId};
 	</select>
 
 	<!--아이디 중복확인-->
     <select id="existsByUserId" resultType="int" parameterType="String">
-        SELECT COUNT(*) FROM users WHERE user_id = #{userId}
+        SELECT COUNT(*) FROM users WHERE user_id = #{userId};
     </select>
+    <!-- 사용자 정보 수정 -->
+	<update id="updateUser" parameterType="map">
+	    UPDATE users
+	    SET name = #{user.name}, gender = #{user.gender}, birthdate = #{user.birthdate}, contact = #{user.contact}, email = #{user.email}, address = #{user.address}
+	    WHERE user_id = #{userId};
+	</update>
 </mapper>

@@ -1,44 +1,99 @@
-import { useState } from "react";
-import { Text, Image, TouchableOpacity, View, StyleSheet, ScrollView, TextInput } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, Image, TouchableOpacity, View, StyleSheet, ScrollView, TextInput, Alert } from "react-native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function My() {
 
-    const [userInfo, setUserInfo] = useState([
-        { label: '이름', key: 'name',  value: '홍길동' },
-        { label: '성별', key: 'gender', value: '남' },
-        { label: '생년월일', key: 'birthdate', value: '1990-01-01' },
-        { label: '연락처',  key: 'contact', value: '010-1234-5678' },
-        { label: '이메일', key: 'email', value: 'ddong@gmail.com' },
-        { label: '주소', key: 'address', value: '경기도 화성시 병점' },
-    ]);
+    const [userInfo, setUserInfo] = useState([]);
     const [editingField, setEditingField] = useState(false);
-    const [tempInfo, setTempInfo] = useState(userInfo.map(item => ({ ...item })));
-
+    const [tempInfo, setTempInfo] = useState([]);
     const navigation = useNavigation();
 
-    function handleSave() {
-        setUserInfo(tempInfo.map(item => ({ ...item })));
-        setEditingField(false);
-    }
 
-    function handleToggleEditSave() {
+    // ✅ DB에서 유저 정보 불러오기
+    useEffect(() => {
+        const loadUserId = async () => {
+            try {
+                // 🔹 로그인 시 저장된 user_id 불러오기
+                const storedId = await AsyncStorage.getItem("user_id");
+                console.log("📦 저장된 user_id:", storedId);
+
+                if (!storedId) {
+                    Alert.alert("오류", "로그인 정보가 없습니다.");
+                    navigation.replace("Login");
+                    return;
+                }
+
+                // 🔹 해당 아이디로 사용자 정보 조회
+                const res = await axios.get(`http://192.168.219.101:8080/users/info/${storedId}`);
+                const data = res.data;
+
+                const mappedData = [
+                    { label: '이름', key: 'name', value: data.name },
+                    { label: '성별', key: 'gender', value: data.gender === 'male' ? 'male' : 'female' },
+                    { label: '생년월일', key: 'birthdate', value: data.birthdate },
+                    { label: '연락처', key: 'contact', value: data.contact },
+                    { label: '이메일', key: 'email', value: data.email },
+                    { label: '주소', key: 'address', value: data.address },
+                ];
+                setUserInfo(mappedData);
+                setTempInfo(mappedData);
+            } catch (err) {
+                console.error("❌ 사용자 정보 불러오기 실패:", err);
+                Alert.alert("오류", "사용자 정보를 불러오지 못했습니다.");
+            }
+        };
+
+        loadUserId(); // ✅ 실행
+    }, []);
+
+    const handleSave = async () => {
+        try {
+            // ✅ 로그인한 사용자 아이디 불러오기
+            const storedId = await AsyncStorage.getItem("user_id");
+            if (!storedId) {
+                Alert.alert("오류", "로그인 정보가 없습니다.");
+                return;
+            }
+
+            // ✅ 수정된 값 객체화
+            const updated = tempInfo.reduce((acc, item) => {
+                acc[item.key] = item.value;
+                return acc;
+            }, {});
+
+            // ✅ 서버로 수정 요청 보내기
+            await axios.put(`http://192.168.219.101:8080/users/update/${storedId}`, updated);
+
+            setUserInfo(tempInfo.map(item => ({ ...item })));
+            setEditingField(false);
+            Alert.alert("성공", "정보가 수정되었습니다!");
+        } catch (err) {
+            console.error("❌ 수정 실패:", err);
+            Alert.alert("오류", "수정 중 문제가 발생했습니다.");
+        }
+    };
+
+
+    const handleToggleEditSave = () => {
         if (editingField) {
             handleSave();
         } else {
             setTempInfo(userInfo.map(item => ({ ...item })));
             setEditingField(true);
         }
-    }
+    };
 
-    function handleChange(key, text) {
-        const updated = tempInfo.map(item => 
+    const handleChange = (key, text) => {
+        const updated = tempInfo.map(item =>
             item.key === key ? { ...item, value: text } : item
         );
         setTempInfo(updated);
-    }
+    };
 
     return (
         <View style={styles.container}>
@@ -47,60 +102,40 @@ export default function My() {
                 <View style={styles.card}>
                     <View style={styles.cardHeader}>
                         <Text style={styles.cardTitle}>프로필 정보</Text>
-
                         <TouchableOpacity onPress={handleToggleEditSave}>
-                        {editingField ? 
-                            <Text style={{color: '#1E90FF', fontWeight: '600'}}>저장</Text> :
-                            <Image source={require('../../assets/pencil.png')} style={styles.editIcon} />
-                        }
-                    </TouchableOpacity>
+                            {editingField
+                                ? <Text style={{ color: '#1E90FF', fontWeight: '600' }}>저장</Text>
+                                : <Image source={require('../../assets/pencil.png')} style={styles.editIcon} />
+                            }
+                        </TouchableOpacity>
                     </View>
 
-                    <View style={styles.profileRow}>
-                        <View style={styles.profileImage} />
-                        <View>
-                            <Text style={styles.profileId}>길똥</Text>
+                    {userInfo.length > 0 ? (
+                        <View style={styles.infoList}>
+                            {userInfo.map((item) => (
+                                <View key={item.key} style={styles.infoRow}>
+                                    <Text style={styles.infoLabel}>{item.label}</Text>
+                                    {editingField && ['email', 'address', 'contact'].includes(item.key) ? (
+                                        <TextInput
+                                            style={styles.input}
+                                            value={tempInfo.find(t => t.key === item.key)?.value || ''}
+                                            onChangeText={(text) => handleChange(item.key, text)}
+                                        />
+                                    ) : (
+                                        <Text style={styles.infoValue}>{item.value || '-'}</Text>
+                                    )}
+                                </View>
+                            ))}
                         </View>
-                    </View>
-
-                    <View style={styles.divider} />
-
-                    <View style={styles.infoList}>
-                        {userInfo.map((item) => (
-                            <View key={item.label} style={styles.infoRow}>
-                                <Text style={styles.infoLabel}>{item.label}</Text>
-                                {editingField ? (
-                                    ['email', 'address'].includes(item.key) ? (
-                                    <TextInput
-                                    style={styles.input}
-                                    value={tempInfo.find(t => t.key === item.key)?.value || ''}
-                                    onChangeText={(text) => {
-                                        handleChange(item.key, text);
-                                    }}
-                                    />
-                                ) : (
-                                     <Text style={styles.infoValue}>{item.value}</Text>
-                                )
-                                ) : (
-                                    <Text style={styles.infoValue}>{item.value}</Text>
-                                )}
-                            </View>
-                        ))}
-                    </View>
-                    <View style={styles.divider} />
+                    ) : (
+                        <Text>불러오는 중...</Text>
+                    )}
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>앱 정보</Text>
-                    <View style={styles.infoList}>
-                        <Text style={styles.infoText}>라이선스</Text>
-                        <Text style={styles.subText}>일부 아이콘은 Freepik에서 디자인되었습니다.</Text>
-                        <Text style={styles.subText}>Some icons are designed by Freepik from the Noun Project.</Text>
-                    </View>
-                </View>
-
-                <TouchableOpacity style={styles.logoutButton}
-                onPress={() => {navigation.replace("Login")}}>
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    onPress={() => navigation.replace("Login")}
+                >
                     <Text style={styles.logoutText}>로그아웃</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -108,6 +143,7 @@ export default function My() {
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
