@@ -4,7 +4,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "expo start",
+    "start": "cross-env REACT_NATIVE_PACKAGER_HOSTNAME=10.125.47.4 expo start --host lan",
+    "start:home": "cross-env-shell \"dotenv -e .env expo start --host lan\"",
+    "start:lyb": "cross-env-shell \"dotenv -e .env.LYB expo start --host lan\"",
+    "start:ksn": "cross-env-shell \"dotenv -e .env.KSN expo start --host lan\"",
+    "start:ihl": "cross-env-shell \"dotenv -e .env.ICL expo start --host lan\"",
+    "start:ajh": "cross-env-shell \"dotenv -e .env.AJH expo start --host lan\"",
     "start:dev": "expo start --dev-client --lan",
     "start:dev:tunnel": "expo start --dev-client --tunnel",
     "android": "expo run:android",
@@ -37,5 +42,8 @@
     "react-native-screens": "~4.16.0",
     "react-native-vector-icons": "^10.3.0"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
 }
