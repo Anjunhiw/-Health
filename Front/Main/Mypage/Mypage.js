@@ -5,7 +5,7 @@ import Tab from "../../Menu/Bottom_Tab";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_URL from "../../config";
+import { API_URL } from "@env";
 
 export default function My() {
 
@@ -128,7 +128,7 @@ export default function My() {
                             {userInfo.map((item) => (
                                 <View key={item.key} style={styles.infoRow}>
                                     <Text style={styles.infoLabel}>{item.label}</Text>
-                                    {editingField && ['email', 'address', 'contact'].includes(item.key) ? (
+                                    {editingField && ['email', 'address'].includes(item.key) ? (
                                         <TextInput
                                             style={styles.input}
                                             value={tempInfo.find(t => t.key === item.key)?.value || ''}

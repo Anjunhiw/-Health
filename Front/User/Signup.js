@@ -1,8 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import API_URL from "../config";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { API_URL } from "@env";
 import {
   TextInput,
   Text,

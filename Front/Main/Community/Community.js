@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import axios from "axios";
-import API_URL from "../../config";
+import { API_URL } from "@env";
 
 export default function Community() {
 

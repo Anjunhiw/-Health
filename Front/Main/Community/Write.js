@@ -4,7 +4,7 @@ import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import React, { useState } from "react";
 import axios from "axios";
-import API_URL from "../../config";
+import { API_URL } from "@env";
 import { Alert } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 //--------------------------------------------------------------             npm install react-native-picker-select 설치해야함
