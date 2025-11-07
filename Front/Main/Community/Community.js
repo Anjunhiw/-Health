@@ -63,7 +63,8 @@ export default function Community() {
                             .map((post, index) => (
                                 <View key={index} style={styles.postCard}>
                                     {/* ✅ 제목과 내용을 가로로 배치 */}
-                                    <View style={styles.rowContainer}>
+                                    <View style={styles.rowContainer}
+                                    onPress={() => navigation.navigate('Detail')}>
                                         <Text style={styles.postTitle}>{post.title}</Text>
                                         <Text style={styles.postContent} numberOfLines={1}>
                                             {post.content}
