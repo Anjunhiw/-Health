@@ -32,7 +32,7 @@ export default function Login() {
         await AsyncStorage.setItem("user_id", id);
         await AsyncStorage.setItem("user_name", res.data.name);
 
-        Alert.alert("로그인 성공", `${res.data.name}님 환영합니다!`);
+        Alert.alert("로그인 성공", `${id}님 환영합니다!`);
         navigation.replace("Home"); // ✅ Home 페이지로 이동
       } else {
         Alert.alert("로그인 실패", res.data.message || "아이디 또는 비밀번호가 올바르지 않습니다.");

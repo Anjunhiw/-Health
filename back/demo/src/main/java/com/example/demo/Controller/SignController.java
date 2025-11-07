@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;  // Logger import
+import org.slf4j.LoggerFactory; // Logger import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +23,16 @@ import com.example.demo.Service.UserService;
 import com.example.demo.Service.CommunityService;
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.219.202:8081")
-//---------------------------------------------------------   테스트중 주 아래다가 추가해 써보도록 안되면 위에꺼 교체해서 사용                            
+// @CrossOrigin(origins = "http://192.168.219.202:8081")
+// --------------------------------------------------------- 테스트중 주 아래다가 추가해
+// 써보도록 안되면 위에꺼 교체해서 사용
 @CrossOrigin(origins = {
-	    "http://192.168.219.101:8081",
-	    "http://192.168.219.202:8081",
-	    "http://192.168.219.116:8081",
-	    "http://10.42.56.241:8081", 
-	    "http://localhost:8081"
-	})
+        "http://192.168.219.101:8081",
+        "http://192.168.219.202:8081",
+        "http://192.168.219.116:8081",
+        "http://10.42.56.241:8081",
+        "http://localhost:8081"
+})
 
 public class SignController {
 
@@ -41,8 +42,8 @@ public class SignController {
     private UserService userService;
     @Autowired
     private CommunityService communityService;
-    
- // 회원가입------------------------------------------------------------------------------------------------
+
+    // 회원가입------------------------------------------------------------------------------------------------
     @PostMapping("/signup")
     public int signUp(@RequestBody User user) {
         logger.info("✅ [회원가입 요청] ID: {}, PW: {}", user.getUser_id(), user.getPassword());
@@ -86,7 +87,9 @@ public class SignController {
         }
         return response;
     }
-    // 아이디 중복 확인------------------------------------------------------------------------------------------------
+
+    // 아이디 중복
+    // 확인------------------------------------------------------------------------------------------------
     @GetMapping("/check-id/{userId}")
     public Map<String, Boolean> checkUserId(@PathVariable("userId") String userId) {
         logger.info("🧐 아이디 중복 확인 요청: {}", userId);
@@ -102,22 +105,25 @@ public class SignController {
         }
         return response;
     }
-    // 게시글------------------------------------------------------------------------------------------------ 
+
+    // 게시글------------------------------------------------------------------------------------------------
     @PostMapping("/write")
     public ResponseEntity<String> writePost(@RequestBody Community community) {
         logger.info("📝 [게시글 등록 요청] 제목: {}, 내용: {}", community.getTitle(), community.getContent());
 
-        communityService.insertCommunity(community); // 
+        communityService.insertCommunity(community); //
         return ResponseEntity.ok("✅ 게시글 등록 성공!");
     }
+
     @GetMapping("/community/list")
     public ResponseEntity<List<Community>> getAllPosts() {
         logger.info("📋 [게시글 목록 조회 요청]");
-        List<Community> list = communityService.getAllCommunity();  // DB에서 전체 게시글 조회
+        List<Community> list = communityService.getAllCommunity(); // DB에서 전체 게시글 조회
         return ResponseEntity.ok(list);
     }
-    
-    // 사용자 정보 조회------------------------------------------------------------------------------------------
+
+    // 사용자 정보
+    // 조회------------------------------------------------------------------------------------------
     @GetMapping("/users/info/{userId}")
     public ResponseEntity<User> getUserInfo(@PathVariable("userId") String userId) {
         logger.info("👤 [사용자 정보 요청] userId: {}", userId);
@@ -132,7 +138,9 @@ public class SignController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    //마이페이지 수정------------------------------------------------------------------------------------------------
+
+    // 마이페이지
+    // 수정------------------------------------------------------------------------------------------------
     @PutMapping("/users/update/{userId}")
     public ResponseEntity<String> updateUser(
             @PathVariable("userId") String userId,
@@ -157,5 +165,5 @@ public class SignController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류");
         }
     }
-    
+
 }

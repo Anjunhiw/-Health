@@ -9,8 +9,8 @@ import API_URL from "../../config";
 export default function Community() {
 
     const [selectedTag, setSelectedTag] = useState('전체');
-    const [posts, setPosts] = useState([]);     // 게시글 리스트
-    const [loading, setLoading] = useState(true); // 로딩 상태
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const tags = ['전체', '정보', '식단', '할인', '운동인증', '후기'];
     const navigation = useNavigation();
 
@@ -51,7 +51,7 @@ export default function Community() {
 
                 <View style={styles.divider} />
 
-                {/* ✅ 게시글 출력 구간 */}
+                {/* 게시글 출력 구간 */}
                 <View style={styles.listContainer}>
                     {loading ? (
                         <Text>불러오는 중...</Text>
@@ -59,21 +59,20 @@ export default function Community() {
                         <Text style={styles.placeholderText}>게시글이 없습니다.</Text>
                     ) : (
                         posts
-                            // ✅ 선택된 카테고리가 "전체"가 아니면 해당 카테고리만 필터링
+                            // 선택된 카테고리가 "전체"가 아니면 해당 카테고리만 필터링
                             .filter(post => selectedTag === '전체' || post.category === selectedTag)
                             .map((post, index) => (
                                 <View key={index} style={styles.postCard}>
-                                    {/* ✅ 제목과 내용을 가로로 배치 */}
-                                    <View style={styles.rowContainer}
+                                    <TouchableOpacity style={styles.rowContainer}
                                     onPress={() => navigation.navigate('Detail')}>
-                                        <Text style={styles.postTitle}>{post.title}</Text>
-                                        <Text style={styles.postContent} numberOfLines={1}>
+                                        <View style={styles.postHeader}>
+                                            <Text style={styles.postTitle} numberOfLines={1}>{post.title}</Text>
+                                            <Text style={styles.categoryLabel}># {post.category}</Text>
+                                        </View>
+                                        <Text style={styles.postContent} numberOfLines={2}>
                                             {post.content}
                                         </Text>
-                                    </View>
-
-                                    {/* ✅ 카테고리 표시 */}
-                                    <Text style={styles.categoryLabel}># {post.category}</Text>
+                                    </TouchableOpacity>
                                 </View>
                             ))
                     )}
@@ -144,14 +143,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#1E90FF',
         position: 'absolute',
         right: 20,
-        bottom: 120, // Tab Bar 위에 위치하도록 조정
+        bottom: 120,
         width: 50,
         height: 50,
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 8, // Android 그림자
-        shadowColor: '#000', // iOS 그림자
+        elevation: 8,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -161,28 +160,51 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
     },
-rowContainer: {
-    flexDirection: 'row',           // 👉 제목 / 내용 가로 배치
+postCard: {
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 15,
+  elevation: 4,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+},
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'space-between',// 👉 좌우 정렬
+    marginBottom: 12,
+  },
+  postTitle: {
+  fontSize: 17,
+  fontWeight: '700',
+  color: '#333',
+  flex: 1,
+  marginRight: 8,
 },
-
-postTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    flex: 1,                        // 👉 제목이 일정 공간 차지
-    marginRight: 10,                // 👉 내용과 간격
+  postContent: {
+  fontSize: 15,
+  color: '#666',
+  lineHeight: 22,
 },
-
-postContent: {
-    flex: 2,                        // 👉 내용이 더 넓게
-    fontSize: 14,
-    color: '#555',
+  categoryLabel: {
+  fontSize: 13,
+  fontWeight: '600',
+  color: '#1E90FF',
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+  },
+  placeholderText: {
+  textAlign: 'center',
+  marginTop: 50,
+  fontSize: 16,
+  color: '#888',
 },
-categoryLabel: {
-    marginTop: 1,
-    fontSize: 10,
-    color: '#1E90FF',
-    alignSelf: 'flex-end',
+  listContainer: {
+  paddingBottom: 80,
 },
+  rowContainer: {
+  },
 });

@@ -96,6 +96,10 @@ export default function My() {
         setTempInfo(updated);
     };
 
+    function handleBack() {
+        setEditingField(false);
+    }
+
     return (
         <View style={styles.container}>
             <Header />
@@ -105,7 +109,15 @@ export default function My() {
                         <Text style={styles.cardTitle}>프로필 정보</Text>
                         <TouchableOpacity onPress={handleToggleEditSave}>
                             {editingField
-                                ? <Text style={{ color: '#1E90FF', fontWeight: '600' }}>저장</Text>
+                                ? <View style={styles.editButtons}>
+                                    <Text 
+                                        style={styles.editText}
+                                        onPress={handleBack}
+                                        >
+                                            취소</Text>
+                                    <Text style={[styles.editText, { color: '#1E90FF' }]} onPress={handleSave}>저장</Text>
+                                    
+                                </View>
                                 : <Image source={require('../../assets/pencil.png')} style={styles.editIcon} />
                             }
                         </TouchableOpacity>
@@ -171,7 +183,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 30,
     },
     cardTitle: {
         fontSize: 18,
@@ -181,7 +193,15 @@ const styles = StyleSheet.create({
     editIcon: {
         width: 22,
         height: 22,
-        tintColor: '#777',
+    },
+    editButtons: {
+        flexDirection: 'row',
+        gap: 25,
+    },
+    editText: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#666',
     },
     profileRow: {
         flexDirection: 'row',

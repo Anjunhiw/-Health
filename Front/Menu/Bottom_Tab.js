@@ -11,32 +11,32 @@ export default function Tab() {
       <View style={styles.container}>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Home")}>
           <Image 
-            source={require('../assets/home.png')} 
-            style={[styles.icon, { opacity: route.name === 'Home' ? 1 : 0.3 }]} 
+            source={require('../assets/home (3).png')} 
+            style={[{width: 45, height: 45} , { opacity: route.name === 'Home' ? 1 : 0.3 }]} 
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Community")}>
           <Image 
-            source={require('../assets/community.png')} 
-            style={[styles.icon, { opacity: route.name === 'Community' ? 1 : 0.3 }]} 
+            source={require('../assets/community (2).png')} 
+            style={[{width: 60, height: 60} , { opacity: route.name === 'Community' ? 1 : 0.3 }]} 
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Event")}>
           <Image 
-            source={require('../assets/megaphone.png')} 
-            style={[styles.icon, { opacity: route.name === 'Event' ? 1 : 0.3 }]} 
+            source={require('../assets/event.png')} 
+            style={[{width: 60, height: 60} , { opacity: route.name === 'Event' ? 1 : 0.3 }]} 
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Wishlist")}>
           <Image 
-            source={require('../assets/love.png')} 
-            style={[styles.icon, { opacity: route.name === 'Wishlist' ? 1 : 0.3 }]} 
+            source={require('../assets/wishlist.png')} 
+            style={[{width: 50, height: 50} , { opacity: route.name === 'Wishlist' ? 1 : 0.3 }]} 
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("My")}>
           <Image 
-            source={require('../assets/user.png')} 
-            style={[styles.icon, { opacity: route.name === 'My' ? 1 : 0.3 }]} 
+            source={require('../assets/mypage (2).png')} 
+            style={[{width: 70, height: 65} , { opacity: route.name === 'My' ? 1 : 0.3 }]} 
           />
         </TouchableOpacity>
       </View>
@@ -61,10 +61,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 4,
-  },
-  icon: {
-    width: 24,
-    height: 24,
   },
   tabText: {
     fontSize: 15,
