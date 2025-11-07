@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import axios from "axios";
+import API_URL from "../../config";
 
 export default function Community() {
 
@@ -17,7 +18,7 @@ export default function Community() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get("http://192.168.219.101:8080/community/list");
+                const response = await axios.get(`${API_URL}/community/list`);
                 setPosts(response.data);
             } catch (error) {
                 console.error("❌ 게시글 불러오기 실패:", error);

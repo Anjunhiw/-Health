@@ -28,6 +28,8 @@ import com.example.demo.Service.CommunityService;
 @CrossOrigin(origins = {
 	    "http://192.168.219.101:8081",
 	    "http://192.168.219.202:8081",
+	    "http://192.168.219.116:8081",
+	    "http://10.42.56.241:8081", 
 	    "http://localhost:8081"
 	})
 

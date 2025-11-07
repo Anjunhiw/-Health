@@ -5,6 +5,7 @@ import Tab from "../../Menu/Bottom_Tab";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_URL from "../../config";
 
 export default function My() {
 
@@ -29,7 +30,7 @@ export default function My() {
                 }
 
                 // 🔹 해당 아이디로 사용자 정보 조회
-                const res = await axios.get(`http://192.168.219.101:8080/users/info/${storedId}`);
+                const res = await axios.get(`${API_URL}/users/info/${storedId}`);
                 const data = res.data;
 
                 const mappedData = [
@@ -67,7 +68,7 @@ export default function My() {
             }, {});
 
             // ✅ 서버로 수정 요청 보내기
-            await axios.put(`http://192.168.219.101:8080/users/update/${storedId}`, updated);
+            await axios.put(`${API_URL}/users/update/${storedId}`, updated);
 
             setUserInfo(tempInfo.map(item => ({ ...item })));
             setEditingField(false);

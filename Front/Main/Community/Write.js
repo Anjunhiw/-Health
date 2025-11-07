@@ -4,6 +4,7 @@ import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import React, { useState } from "react";
 import axios from "axios";
+import API_URL from "../../config";
 import { Alert } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 //--------------------------------------------------------------             npm install react-native-picker-select 설치해야함
@@ -22,7 +23,7 @@ export default function Write() {
         }
         try {
             // 👉 백엔드에 게시글 등록 요청 (IP와 포트는 너 프로젝트에 맞게 바꿔!)
-            const response = await axios.post("http://192.168.219.101:8080/write", {
+            const response = await axios.post(`${API_URL}/write`, {
                 title: title,
                 content: content,
                 writer: "user01",

@@ -4,7 +4,8 @@ import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
 import axios from "axios";
 import { Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage"; 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_URL from "../config";
 
 export default function Login() {
   const [ id, setId ] = useState('');
@@ -19,7 +20,7 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post("http://192.168.219.101:8080/login", {
+      const res = await axios.post(`${API_URL}/login`, {
         user_id: id,
         password: password,
       });
