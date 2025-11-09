@@ -14,5 +14,9 @@ public interface UserMapper {
 	List<User> SelectUser();
 	User findByUserId(String userId);
 	int existsByUserId(String userId); // 아이디 중복확인
-	int updateUser(@Param("userId") String userId, @Param("user") User user);//마이페이지 수
+	int updateUser(@Param("userId") String userId, @Param("user") User user);//마이페이지 수정
+    User findByNameContactEmail( // 이름, 전화번호, 이메일로 아이디 찾기
+    	    @Param("name")String name,
+    	    @Param("contact")String contact,
+    	    @Param("email")String email);
 }

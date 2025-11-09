@@ -28,4 +28,20 @@
 	    SET name = #{user.name}, gender = #{user.gender}, birthdate = #{user.birthdate}, contact = #{user.contact}, email = #{user.email}, address = #{user.address}
 	    WHERE user_id = #{userId};
 	</update>
+	<!-- 아이디 찾기: 이름+연락처+이메일로 1건 조회 -->
+	<select id="findByNameContactEmail"
+	        parameterType="map"
+	        resultType="com.example.demo.Model.User">
+	  SELECT user_id, name, contact, email, birthdate, address, gender
+	  FROM users
+	  WHERE TRIM(name) = TRIM(#{name})
+	    AND REPLACE(contact, '-', '') = #{contact}      <!-- ★ #{contact} 로 통일 -->
+	    AND LOWER(TRIM(email)) = LOWER(TRIM(#{email}))
+	  LIMIT 1
+	</select>
+
+	
+	
+	
+	
 </mapper>

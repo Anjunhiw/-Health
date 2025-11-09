@@ -23,7 +23,7 @@ export default function pw() {
         </View>
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder="연락처"
+            placeholder="이메일 주소"
             style={styles.input}
             keyboardType="phone-pad"
           />

@@ -34,5 +34,9 @@ public class UserService {
 	public int updateUser(String userId, User updatedUser) {
 	    return userMapper.updateUser(userId, updatedUser);
 	}
+	// 이름, 전화번호, 이메일로 아이디 찾기
+	public User findByNameContactEmail(String name, String contact, String email) {
+	    return userMapper.findByNameContactEmail(name, contact, email);
+	}
 	
 }

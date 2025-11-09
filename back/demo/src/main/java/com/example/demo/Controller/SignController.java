@@ -167,4 +167,41 @@ public class SignController {
         }
     }
 
-}
+    // 아이디 찾기------------------------------------------------------------------------------------------------
+    @PostMapping("/users/find-id")
+    public ResponseEntity<?> findId(@RequestBody Map<String, String> body) {
+        String name  = body.getOrDefault("name", "").trim();
+        String contactOnly = body.getOrDefault("contact", "").replaceAll("\\D", "");
+        String email = body.getOrDefault("email", "").trim();
+
+        logger.info("🔎 [아이디 찾기] name={}, contact={}, email={}", name, contactOnly, email);
+
+        try {
+        	User u = userService.findByNameContactEmail(name, contactOnly, email);
+            if (u != null) return ResponseEntity.ok(Map.of("user_id", u.getUser_id()));
+            return ResponseEntity.ok(new HashMap<>()); // 못 찾으면 빈 응답
+        } catch (Exception e) {
+            logger.error("🔥 find-id 오류: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("message", "server error"));
+        }
+    }
+    
+    
+    
+    
+    
+    
+
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
