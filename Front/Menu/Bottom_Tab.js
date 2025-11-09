@@ -9,35 +9,45 @@ export default function Tab() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Home")}>
-          <Image 
-            source={require('../assets/home (3).png')} 
-            style={[{width: 45, height: 45} , { opacity: route.name === 'Home' ? 1 : 0.3 }]} 
-          />
-        </TouchableOpacity>
+       <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Home")}>
+  <Image 
+    source={route.name === 'Home' 
+      ? require('../assets/home (2).png') 
+      : require('../assets/home.png')} 
+    style={{width: 50, height: 50}} 
+  />
+</TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Community")}>
           <Image 
-            source={require('../assets/community (2).png')} 
-            style={[{width: 60, height: 60} , { opacity: route.name === 'Community' ? 1 : 0.3 }]} 
-          />
+    source={route.name === 'Community' 
+      ? require('../assets/community (2).png') 
+      : require('../assets/community.png')} 
+    style={{width: 65, height: 65}} 
+  />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Event")}>
           <Image 
-            source={require('../assets/event.png')} 
-            style={[{width: 60, height: 60} , { opacity: route.name === 'Event' ? 1 : 0.3 }]} 
-          />
+    source={route.name === 'Event' 
+      ? require('../assets/event (2).png') 
+      : require('../assets/event.png')} 
+    style={{width: 65, height: 65}} 
+  />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Wishlist")}>
           <Image 
-            source={require('../assets/wishlist.png')} 
-            style={[{width: 50, height: 50} , { opacity: route.name === 'Wishlist' ? 1 : 0.3 }]} 
-          />
+    source={route.name === 'Wishlist' 
+      ? require('../assets/wishlist (2).png') 
+      : require('../assets/wishlist.png')} 
+    style={{width: 55, height: 55}} 
+  />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("My")}>
-          <Image 
-            source={require('../assets/mypage (2).png')} 
-            style={[{width: 70, height: 65} , { opacity: route.name === 'My' ? 1 : 0.3 }]} 
-          />
+           <Image 
+    source={route.name === 'My' 
+      ? require('../assets/mypage (2).png') 
+      : require('../assets/mypage.png')} 
+    style={{width: 75, height: 65}} 
+  />
         </TouchableOpacity>
       </View>
     </SafeAreaView>

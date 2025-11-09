@@ -1,4 +1,4 @@
-import { Text, View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, StyleSheet, Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, ScrollView, Touchable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
@@ -16,11 +16,18 @@ export default function Write() {
     const [content, setContent] = useState('');
     const [selectedTag, setSelectedTag] = useState(null);
 
+    const tags = ['전체', '정보', '식단', '할인', '운동인증', '후기'];
+
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim()) {
             Alert.alert("오류", "제목과 내용을 모두 입력해주세요!");
             return;
         }
+        if (!selectedTag) {
+            Alert.alert("오류", "카테고리를 선택해주세요!");
+            return;
+        }
+
         try {
             // 👉 백엔드에 게시글 등록 요청 (IP와 포트는 너 프로젝트에 맞게 바꿔!)
             const response = await axios.post(`${API_URL}/write`, {
@@ -42,23 +49,18 @@ export default function Write() {
         }
     };
 
-        
-        
-
-
-
-
     return(
-        <View style={styles.container}>
+        <KeyboardAvoidingView style={styles.container}>
             <Header />
-            
+
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
              <View style={styles.content}>
             {/* ✅ 제목 + 드롭다운을 한 줄에 가로 배치 */}
             <View style={styles.headerRow}>
                 <Text style={styles.title}>게시글 작성</Text>
 
                 {/* ✅ 여기에 드롭다운 추가 */}
-                <RNPickerSelect
+                {/* <RNPickerSelect
                     onValueChange={(value) => setSelectedTag(value)}
                     items={[
                         { label: '전체', value: '전체' },
@@ -73,9 +75,35 @@ export default function Write() {
                         inputIOS: styles.dropdown,
                         inputAndroid: styles.dropdown,
                     }}
-                />
-            </View>
+                /> */}
 
+                <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.tagContainer}
+          >
+            {tags.map((tag) => (
+              <TouchableOpacity
+                key={tag}
+                style={[
+                  styles.tagButton,
+                  selectedTag === tag && styles.activeTagButton,
+                ]}
+                onPress={() => setSelectedTag(tag)}
+              >
+                <Text
+                  style={[
+                    styles.tagText,
+                    selectedTag === tag && styles.activeTagText,
+                  ]}
+                >
+                  # {tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+            </View>
+            <View>
                 <TextInput
                     style={styles.input}
                     placeholder="제목"
@@ -96,10 +124,12 @@ export default function Write() {
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>등록</Text>
                 </TouchableOpacity>
+            
             </View>
-
+            </View>
+            </TouchableWithoutFeedback>
             <Tab />
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -112,10 +142,15 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
     },
+     headerRow: {
+    marginBottom: 10,
+    },
     title: {
+
         fontSize: 24,
         fontWeight: '700',
-        marginBottom: 20,
+        marginTop: -20,
+        marginBottom: 30,
     },
     input: {
         borderWidth: 1,
@@ -130,6 +165,31 @@ const styles = StyleSheet.create({
     textarea: {
         height: 150,
     },
+     tagContainer: {
+        flexGrow: 0,
+        marginBottom: 25,
+    },
+    tagButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        backgroundColor: '#f9f9f9',
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    activeTagButton: {
+        borderColor: '#1E90FF',
+        backgroundColor: '#fff',
+    },
+    tagText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#555',
+    },
+    activeTagText: {
+        color: '#1E90FF',
+    },
     button: {
         backgroundColor: '#1E90FF',
         paddingVertical: 15,
@@ -141,12 +201,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: '600',
-    },
-    headerRow: {
-    flexDirection: 'row',        // 가로로 배치
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
     },
     dropdown: {
         fontSize: 16,

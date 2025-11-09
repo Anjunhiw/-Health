@@ -35,7 +35,7 @@ export default function My() {
 
                 const mappedData = [
                     { label: '이름', key: 'name', value: data.name },
-                    { label: '성별', key: 'gender', value: data.gender === 'male' ? 'male' : 'female' },
+                    { label: '성별', key: 'gender', value: data.gender === 'male' ? '남성' : '여성' },
                     { label: '생년월일', key: 'birthdate', value: data.birthdate },
                     { label: '연락처', key: 'contact', value: data.contact },
                     { label: '이메일', key: 'email', value: data.email },
