@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Text, View, TextInput, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { useState, useEffect, useRef} from "react";
+import { Text, View, TextInput, Animated, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
 import axios from "axios";
@@ -12,6 +12,24 @@ export default function Login() {
   const [ password, setPassword ] = useState('');
   const [ isChecked, setChecked ] = useState(false);
   const navigation = useNavigation();
+  const bounceValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bounceValue, {
+          toValue: -5, // 올라갔다가
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bounceValue, {
+          toValue: 0, // 원래 위치로
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
 
   const handleLogin = async () => {
     if (!id.trim() || !password.trim()) {
@@ -50,6 +68,10 @@ export default function Login() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.logoContainer}>
+        <Animated.Image 
+                    source={require('../assets/logo (2).png')} 
+                    style={[styles.logo, { transform: [{ translateY: bounceValue }] }]} 
+                  />
         <Text style={styles.logoText}>GymSpot</Text>
       </View>
       <View style={styles.inputContainer}>
@@ -116,10 +138,16 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
+    marginBottom: 20
   },
   logoContainer: {
     alignItems: "center",
     marginBottom: 40,
+  },
+  logo: {
+    width: 120,
+    height: 55,
+    marginBottom: 10
   },
   logoText: {
     fontSize: 36,

@@ -1,17 +1,41 @@
 import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Header() {
 
     const navigation = useNavigation();
 
+      const [userId, setUserId] = useState('');
+
+    useEffect(() => {
+        const loadUserName = async () => {
+            const storedId = await AsyncStorage.getItem("user_id");
+            if (storedId) {
+                setUserId(storedId);
+            }
+        };
+        loadUserName();
+    }, []);
+
     return(
          <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
+          <Image 
+            source={require('../assets/logo (2).png')} 
+            style={styles.logo} 
+          />
             <Text style={styles.logoText}>GymSpot</Text>
             <View style={styles.userContainer}>
-                <Text style={styles.userText}>id 님</Text>
+              {userId ? (
+                <Text style={styles.userText}>{userId} 님</Text>
+              ) : (
+                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                  <Text style={styles.userText}>로그인</Text>
+                </TouchableOpacity>
+              )}
             </View>
         </View>
         </SafeAreaView>
@@ -25,18 +49,25 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     height: 60,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',        
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     backgroundColor: '#fff',
     paddingHorizontal: 15,
   },
+  logo: {
+    width: 65,
+    height: 40,
+  },
   logoText: {
-    fontSize: 25,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#1E90FF",
-    position: 'absolute', // 로고를 중앙에 유지
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
   },
   userContainer: {
     flexDirection: 'row',
