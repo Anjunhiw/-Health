@@ -14,32 +14,36 @@ export default function Tab() {
     source={route.name === 'Home' 
       ? require('../assets/home (2).png') 
       : require('../assets/home.png')} 
-    style={{width: 50, height: 50}} 
+    style={{width: 55, height: 50, marginTop: 5}} 
   />
+        <Text style={[styles.tabText, { marginTop: 0 }]}>홈</Text>
 </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Community")}>
           <Image 
     source={route.name === 'Community' 
       ? require('../assets/community (2).png') 
       : require('../assets/community.png')} 
-    style={{width: 65, height: 65}} 
+    style={{width: 70, height: 65}} 
   />
+          <Text style={styles.tabText}>커뮤니티</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Event")}>
           <Image 
     source={route.name === 'Event' 
       ? require('../assets/event (2).png') 
       : require('../assets/event.png')} 
-    style={{width: 65, height: 65}} 
+    style={{width: 68, height: 65}} 
   />
+          <Text style={styles.tabText}>이벤트</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("Wishlist")}>
           <Image 
     source={route.name === 'Wishlist' 
       ? require('../assets/wishlist (2).png') 
       : require('../assets/wishlist.png')} 
-    style={{width: 55, height: 55}} 
+    style={{width: 50, height: 50, marginTop: 12}} 
   />
+          <Text style={[styles.tabText, { marginTop: 0 }]}>찜</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("My")}>
            <Image 
@@ -48,6 +52,7 @@ export default function Tab() {
       : require('../assets/mypage.png')} 
     style={{width: 75, height: 65}} 
   />
+          <Text style={styles.tabText}>마이페이지</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -73,7 +78,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tabText: {
-    fontSize: 15,
+    fontSize: 10,
     color: "#333",
+    marginTop: -12,
   },
 });

@@ -1,9 +1,31 @@
-import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function pw() {
 
+    const [verifyNum, setVerifyNum] = useState('');
+    const [verifyMessage, setVerifyMessage] = useState('');
+    const [servercode, setServercode] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
+
     const navigation = useNavigation();
+
+  const CheckVerifyNum = async () => {
+    if(verifyNum === servercode) {
+      setVerifyMessage("인증되었습니다.");
+      setIsVerified(true);
+    } else {
+      setVerifyMessage("인증번호가 일치하지 않습니다. 다시 확인해주세요.");
+      setIsVerified(false);
+    }
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setVerifyNum('');
+    setVerifyMessage('');
+  };
 
     return (
     <KeyboardAvoidingView
@@ -31,6 +53,42 @@ export default function pw() {
              <Text style={styles.contactButtonText}>인증</Text>
             </TouchableOpacity>
         </View>
+         {/* 인증 모달 */}
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={modalVisible}
+                  onRequestClose={() => setModalVisible(false)}
+                >
+                  <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>인증번호를 입력해주세요.</Text>
+                      <TextInput
+                        placeholder="인증번호 입력"
+                        value={verifyNum}
+                        onChangeText={setVerifyNum}
+                        style={styles.modalInput}
+                        keyboardType="number-pad"
+                        />
+                        <Text style={[styles.modalMessageText, { color: isVerified ? 'green' : 'red' }]}>{verifyMessage}</Text>
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity 
+                                style={[styles.modalButton, styles.modalCloseButton]} 
+                                onPress={() => closeModal()}
+                            >
+                                <Text style={styles.modalButtonText}>닫기</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={styles.modalButton} 
+                                onPress={CheckVerifyNum}
+                            >
+                                <Text style={styles.modalButtonText}>인증 확인</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                  </View>
+                </Modal>
+        
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>비밀번호 재설정</Text>
         </TouchableOpacity>
@@ -125,5 +183,65 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+   modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  modalMessageText: {
+    marginBottom: 15,
+    fontSize: 14,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: '#1E90FF',
+    marginHorizontal: 5,
+  },
+  modalCloseButton: {
+    backgroundColor: '#6c757d',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 })

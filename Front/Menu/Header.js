@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#1E90FF",
+    color: "#2596be",
     position: 'absolute',
     left: 0,
     right: 0,

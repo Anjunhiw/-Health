@@ -64,7 +64,7 @@ export default function Community() {
                             .map((post, index) => (
                                 <View key={index} style={styles.postCard}>
                                     <TouchableOpacity style={styles.rowContainer}
-                                    onPress={() => navigation.navigate('Detail')}>
+                                    onPress={() => navigation.navigate('Cm_Detail')}>
                                         <View style={styles.postHeader}>
                                             <Text style={styles.postTitle} numberOfLines={1}>{post.title}</Text>
                                             <Text style={styles.categoryLabel}># {post.category}</Text>

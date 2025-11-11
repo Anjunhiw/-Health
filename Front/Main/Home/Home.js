@@ -1,11 +1,15 @@
-import { Text, View, TextInput, StyleSheet, TouchableWithoutFeedback, Keyboard, Image, TouchableOpacity } from "react-native";
+import { Text, View, TextInput, ScrollView, StyleSheet, TouchableWithoutFeedback, Keyboard, Image, TouchableOpacity } from "react-native";
 import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Home() {
 
   const [address, setAddress] = useState('');
+
+  const navigation = useNavigation();
+  const borderColor = !address ? '#ccc' : '#000';
 
   function deleteAddress() {
     setAddress('');
@@ -28,7 +32,7 @@ export default function Home() {
   <View style={{ flex: 1 }}>
     <Header />
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { borderColor}]}>
         <TextInput
           value={address}
           onChangeText={setAddress}
@@ -38,26 +42,32 @@ export default function Home() {
         <View style={styles.searchButton}>
         <TouchableOpacity onPress={deleteAddress}>
         <Text 
-        style={{fontSize: 20, color: !address ? '#ccc' : '#000'}}>X</Text>
+        style={{fontSize: 20, color: borderColor}}>X</Text>
         </TouchableOpacity>
-        <Text style={{fontSize: 18}}>|</Text>
+        <Text style={{fontSize: 18, color: borderColor}}>|</Text>
         <TouchableOpacity>
          <Image source={require('../../assets/search.png')} style={styles.searchIcon} />
          </TouchableOpacity>
          </View>
       </View>
-      {Array.from({ length: Math.ceil(gymItems.length / 3) }).map((_, rowIndex) => (
-        <View style={styles.iconContainer} key={rowIndex}>
-          {gymItems.slice(rowIndex * 3, rowIndex * 3 + 3).map((item, index) => (
-            <View style={styles.gymIconContainer} key={index}>
-              <TouchableOpacity>
-              {item.icon && <Image source={item.icon} style={styles.gymIcon} />}
-              {/* <Text style={styles.gymText}>{item.name}</Text> */}
-              </TouchableOpacity>
-            </View>
+      <Text style={styles.title}>어떤 운동을 찾으시나요?</Text>
+      <ScrollView>
+         <View style={styles.iconContainer}>
+          {gymItems.map((item, index) => (
+            <TouchableOpacity 
+            onPress={() => navigation.navigate('Pg_Detail')}
+            style={styles.itemCard} key={index}>
+              <View style={styles.itemContent}>
+                {item.icon && <Image source={item.icon} style={styles.gymIcon} />}
+                <View style={styles.textContainer}>
+                  <Text style={styles.gymNameText}>{item.name}</Text>
+                  <Text style={styles.wishlistText}>❤️ 찜 0개</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
-      ))}
+        </ScrollView>
     </View>
     <Tab />
   </View>
@@ -70,16 +80,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 15,
-    backgroundColor: '#fff',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center', 
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 12,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: "#000",
-    paddingHorizontal: 15, 
   },
   searchIcon: {
     width: 30,
@@ -87,24 +95,64 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1, 
-    paddingVertical: 12, 
+    paddingVertical: 15, 
     fontSize: 18,
   },
   searchButton: {
     flexDirection: 'row',
     gap: 10,
   },
-  iconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 40,
-    gap: 30,
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 30,
+    marginBottom: 30,
+    color: '#333',
   },
-  gymIconContainer: {
+  iconContainer: {
     alignItems: 'center',
+    paddingBottom: 20,
+  },
+  itemCard: {
+  width: '100%', 
+  marginBottom: 20,
+  backgroundColor: '#fff',
+  borderRadius: 15,
+  padding: 15,
+  // 그림자 강조
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 5 },
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 5, // Android용 그림자
+  borderWidth: 1,
+  borderColor: '#eee', // 카드 경계 강조
+},
+
+  itemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   gymIcon: {
-    width: 100,
-    height: 100
-  }
+    width: 110,
+    height: 80,
+    marginRight: 15,
+  },
+  textContainer: {
+    flex: 1,
+    alignItems: 'flex-end',
+    marginRight: 50,
+  },
+  gymNameText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 15,
+  },
+  wishlistText: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginTop: 8,
+  },
 });
