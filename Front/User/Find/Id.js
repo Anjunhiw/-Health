@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal } from "react-native"; // ✅ Alert 추가
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -10,7 +10,6 @@ export default function Id() {
   const [contact, setContact] = useState('');
   const [verifyNum, setVerifyNum] = useState('');
   const [verifyMessage, setVerifyMessage] = useState('');
-  const [servercode, setServercode] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
@@ -21,43 +20,57 @@ export default function Id() {
     baseURL: API_URL,   // 예: http://192.168.219.116:8080
     timeout: 10000,
   });
+  //이메일 변경 시 인증상태 초기화
+  useEffect(() => {
+    setIsVerified(false);
+    setVerifyNum('');
+    setVerifyMessage('');
+  }, [email]);
 
   // ✅ 이메일 인증코드 전송
-  const onSendCode = async () => {
-    const em = email.trim();
-    if (!em) { Alert.alert("입력 오류", "이메일을 입력하세요."); return; }
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
-    if (!ok) { Alert.alert("형식 오류", "올바른 이메일 형식이 아닙니다."); return; }
-    setModalVisible(true); // 테스트용 모달 열기
+    const onSendCode = async () => {
+      const em = email.trim();
+      if (!em) { Alert.alert("입력 오류", "이메일을 입력하세요."); return; }
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+      if (!ok) { Alert.alert("형식 오류", "올바른 이메일 형식이 아닙니다."); return; }
 
-    try {
-      // ⚠️ 백엔드 경로에 맞게 수정: 예) POST /auth/send-code { email }
-      const res =await api.post("/auth/send-code", { email: em });
-      setServercode(res.data.code); // 서버에서 받은 인증코드 저장
-      // setModalVisible(true); // 모달 열기
-      Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
-    } catch (e) {
-      console.log("[SendCode ERR]", e?.response?.status, e?.response?.data || e.message);
-      Alert.alert("오류", "인증코드 전송에 실패했습니다.");
-    }
-  };
+      try {
+        await api.post("/auth/send-code", { email: em }); // 서버가 메일 발송
+       // await api.post("/auth/ping", { test: "hello" }); 
+        // 상태 초기화 후 모달 열기 (← 성공 후)
+        setVerifyNum('');
+        setVerifyMessage('');
+        setIsVerified(false);
+        setModalVisible(true);
+
+        Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
+      } catch (e) {
+        console.log("[SendCode ERR]", e?.response?.status, e?.response?.data || e.message);
+        Alert.alert("오류", "인증코드 전송에 실패했습니다.");
+      }
+    };
 
   const CheckVerifyNum = async () => {
-    if(verifyNum === servercode) {
+    const em = email.trim();
+    const code = verifyNum.trim();
+    if (!code) { Alert.alert("입력 오류", "인증번호를 입력하세요."); return; }
+    try {
+      await api.post("/auth/verify-code", { email: em, code }); // ✅ 서버에서만 검증
       setVerifyMessage("인증되었습니다.");
       setIsVerified(true);
-    } else {
+      setModalVisible(false);
+    } catch (e) {
+      console.log("[VerifyCode ERR]", e?.response?.status, e?.response?.data || e.message);
       setVerifyMessage("인증번호가 일치하지 않습니다. 다시 확인해주세요.");
       setIsVerified(false);
     }
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
-    setVerifyNum('');
-    setVerifyMessage('');
-  };
-
+    const closeModal = () => {
+      setModalVisible(false);
+      setVerifyNum('');
+      setVerifyMessage('');
+    };
 
   // ✅ 아이디 찾기
   const onFindId = async () => {
@@ -146,17 +159,18 @@ export default function Id() {
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
+          onRequestClose={closeModal}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>인증번호를 입력해주세요.</Text>
-              <TextInput
-                placeholder="인증번호 입력"
-                value={verifyNum}
-                onChangeText={setVerifyNum}
-                style={styles.modalInput}
-                keyboardType="number-pad"
+          <TextInput
+            placeholder="인증번호 입력"
+            value={verifyNum}
+            onChangeText={(t) => setVerifyNum(t.replace(/\D/g, '').slice(0, 6))}
+            style={styles.modalInput}
+            keyboardType="number-pad"
+            maxLength={6}
                 />
                 <Text style={[styles.modalMessageText, { color: isVerified ? 'green' : 'red' }]}>{verifyMessage}</Text>
                 <View style={styles.modalButtonContainer}>
@@ -317,3 +331,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+

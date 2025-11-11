@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.Model.Community;
 import com.example.demo.Model.User;
 import com.example.demo.Service.UserService;
+import com.example.demo.Service.VerificationStore;
 import com.example.demo.Service.CommunityService;
+import com.example.demo.Service.MailService;
+
 
 @RestController
 // @CrossOrigin(origins = "http://192.168.219.202:8081")
@@ -43,6 +46,10 @@ public class SignController {
     private UserService userService;
     @Autowired
     private CommunityService communityService;
+    @Autowired
+    private MailService mailService;
+    @Autowired
+    private VerificationStore verificationStore;
 
     // 회원가입------------------------------------------------------------------------------------------------
     @PostMapping("/signup")
@@ -187,10 +194,62 @@ public class SignController {
         }
     }
     
-    
-    
-    
-    
+ // ✅ 이메일 인증: 코드 발송 (검증은 나중에)
+    @PostMapping("/auth/send-code")
+    public ResponseEntity<?> sendCode(@RequestBody Map<String, Object> body) {
+        String email = String.valueOf(body.get("email")).trim();
+        logger.info("📨 [인증코드 발송] email={}", email);
+
+        try {
+            // 1) 코드 생성 & 저장(5분 유효)
+        	String code = verificationStore.issue(email);
+
+            // 2) 메일 발송 (제목/본문은 MailService.sendCode에서 고정 처리)
+            mailService.sendCode(email, code);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("ok", true);
+            return ResponseEntity.ok(res);
+
+        } catch (IllegalStateException e) { // 과도한 요청 등 정책 위반 시
+            logger.warn("⏱️ [인증코드 발송 제한] {}", e.getMessage());
+            Map<String, Object> res = new HashMap<>();
+            res.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(res);
+
+        } catch (Exception e) {
+            logger.error("🔥 [인증코드 발송 실패] {}", e.getMessage());
+            Map<String, Object> res = new HashMap<>();
+            res.put("message", "send fail");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+        }
+    }
+ // ✅ 이메일 인증: 코드 검증
+    @PostMapping("/auth/verify-code")
+    public ResponseEntity<?> verifyCode(@RequestBody Map<String, Object> body) {
+        String email = String.valueOf(body.get("email")).trim();
+        String code  = String.valueOf(body.get("code")).trim();
+        logger.info("✅ [인증코드 검증] email={}, code={}", email, code);
+
+        try {
+            boolean ok = verificationStore.verify(email, code); // 5분 TTL + 일치 확인(성공 시 1회성 삭제)
+            Map<String, Object> res = new HashMap<>();
+            res.put("verified", ok);
+
+            if (ok) {
+                return ResponseEntity.ok(res); // 200 { verified: true }
+            } else {
+                res.put("message", "invalid or expired code");
+                return ResponseEntity.badRequest().body(res); // 400
+            }
+        } catch (Exception e) {
+            logger.error("🔥 [인증 처리 오류] {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("message", "server error"));
+        }
+    }
+
+
     
 
     }
