@@ -1,21 +1,69 @@
-import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal} from "react-native";
+import React, { useState } from "react";
+import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import { API_URL } from "@env";
 
-export default function pw() {
+export default function Pw() {
+  // ★ 추가: 아이디 상태
+  const [userId, setUserId] = useState("");
 
-    const [verifyNum, setVerifyNum] = useState('');
-    const [verifyMessage, setVerifyMessage] = useState('');
-    const [servercode, setServercode] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
-    const [isVerified, setIsVerified] = useState(false);
+  const [email, setEmail] = useState("");
+  const [verifyNum, setVerifyNum] = useState("");
+  const [verifyMessage, setVerifyMessage] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
-  const CheckVerifyNum = async () => {
-    if(verifyNum === servercode) {
+  const api = axios.create({
+    baseURL: API_URL,   // 예: http://192.168.219.116:8080
+    timeout: 10000,
+  });
+
+  // 인증코드 전송 → 성공 시 모달 오픈
+const onSendCode = async () => {
+  const em = email.trim();
+  const uid = userId.trim(); // ★ 추가
+
+  if (!uid) { Alert.alert("입력 오류", "아이디를 입력하세요."); return; }
+  if (!em)  { Alert.alert("입력 오류", "이메일을 입력하세요."); return; }
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+  if (!ok)  { Alert.alert("형식 오류", "올바른 이메일 형식이 아닙니다."); return; }
+
+  try {
+    // ★ userId도 같이 보냄
+    await api.post("/auth/send-code", { userId: uid, email: em });
+
+    setVerifyNum("");
+    setVerifyMessage("");
+    setIsVerified(false);
+    setModalVisible(true);
+    Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
+  } catch (e) {
+    const msg = e?.response?.data?.message || "인증코드 전송에 실패했습니다.";
+    Alert.alert("오류", msg);
+    console.log("[SendCode ERR]", e?.response?.status, e?.response?.data || e.message);
+  }
+};
+
+  // 인증번호 확인(서버 검증)
+  const checkVerifyNum = async () => {
+    const em = email.trim();
+    const code = verifyNum.trim();
+
+    if (!/^\d{6}$/.test(code)) {
+      Alert.alert("입력 오류", "6자리 숫자 인증번호를 입력하세요.");
+      return;
+    }
+
+    try {
+      await api.post("/auth/verify-code", { email: em, code });
       setVerifyMessage("인증되었습니다.");
       setIsVerified(true);
-    } else {
+      setModalVisible(false);
+    } catch (e) {
+      console.log("[VerifyCode ERR]", e?.response?.status, e?.response?.data || e.message);
       setVerifyMessage("인증번호가 일치하지 않습니다. 다시 확인해주세요.");
       setIsVerified(false);
     }
@@ -23,19 +71,28 @@ export default function pw() {
 
   const closeModal = () => {
     setModalVisible(false);
-    setVerifyNum('');
-    setVerifyMessage('');
+    setVerifyNum("");
+    setVerifyMessage("");
   };
 
-    return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+  // 비밀번호 재설정(다음 화면 이동/토큰 발급 등)
+  const onResetPassword = () => {
+    if (!isVerified) {
+      Alert.alert("인증 필요", "이메일 인증을 먼저 완료해주세요.");
+      return;
+    }
+    // 필요 시 userId와 email을 다음 화면으로 넘길 수 있음
+    // navigation.navigate('PwReset', { userId, email });
+    Alert.alert("안내", `인증 완료. 비밀번호 재설정 절차로 이동합니다.\n아이디: ${userId || "(미입력)"}`);
+  };
+
+  return (
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={styles.contentContainer}>
-         <View style={styles.logoContainer}>
-                        <Text style={styles.logoText}>GymSpot</Text>
-                      </View>
+        <View style={styles.logoContainer}>
+          <Text style={styles.logoText}>GymSpot</Text>
+        </View>
+
         <View style={styles.titleContainer}>
           <TouchableOpacity onPress={() => navigation.replace('Id')}>
             <Text style={styles.text}>아이디 찾기</Text>
@@ -43,63 +100,76 @@ export default function pw() {
           <Text>|</Text>
           <Text style={[styles.text, styles.activeText]}>비밀번호 찾기</Text>
         </View>
+
+        {/* ★ 추가: 아이디 입력 */}
+        <View style={styles.fieldGroup}>
+          <TextInput
+            placeholder="아이디"
+            value={userId}
+            onChangeText={setUserId}
+            style={styles.fullInput}
+            autoCapitalize="none"
+            returnKeyType="next"
+          />
+        </View>
+
+        {/* 이메일 + 인증 버튼 */}
         <View style={styles.inputContainer}>
           <TextInput
             placeholder="이메일 주소"
+            value={email}
+            onChangeText={setEmail}
             style={styles.input}
-            keyboardType="phone-pad"
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
-           <TouchableOpacity style={styles.contactButton}>
-             <Text style={styles.contactButtonText}>인증</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.contactButton} onPress={onSendCode}>
+            <Text style={styles.contactButtonText}>인증</Text>
+          </TouchableOpacity>
         </View>
-         {/* 인증 모달 */}
-                <Modal
-                  animationType="slide"
-                  transparent={true}
-                  visible={modalVisible}
-                  onRequestClose={() => setModalVisible(false)}
-                >
-                  <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                      <Text style={styles.modalTitle}>인증번호를 입력해주세요.</Text>
-                      <TextInput
-                        placeholder="인증번호 입력"
-                        value={verifyNum}
-                        onChangeText={setVerifyNum}
-                        style={styles.modalInput}
-                        keyboardType="number-pad"
-                        />
-                        <Text style={[styles.modalMessageText, { color: isVerified ? 'green' : 'red' }]}>{verifyMessage}</Text>
-                        <View style={styles.modalButtonContainer}>
-                            <TouchableOpacity 
-                                style={[styles.modalButton, styles.modalCloseButton]} 
-                                onPress={() => closeModal()}
-                            >
-                                <Text style={styles.modalButtonText}>닫기</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                                style={styles.modalButton} 
-                                onPress={CheckVerifyNum}
-                            >
-                                <Text style={styles.modalButtonText}>인증 확인</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                  </View>
-                </Modal>
-        
-        <TouchableOpacity style={styles.button}>
+
+        {/* 인증 모달 */}
+        <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={closeModal}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>인증번호를 입력해주세요.</Text>
+              <TextInput
+                placeholder="인증번호(6자리)"
+                value={verifyNum}
+                onChangeText={(t) => setVerifyNum(t.replace(/\D/g, "").slice(0, 6))}
+                style={styles.modalInput}
+                keyboardType="number-pad"
+                maxLength={6}
+              />
+              <Text style={[styles.modalMessageText, { color: isVerified ? "green" : "red" }]}>{verifyMessage}</Text>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity style={[styles.modalButton, styles.modalCloseButton]} onPress={closeModal}>
+                  <Text style={styles.modalButtonText}>닫기</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalButton} onPress={checkVerifyNum}>
+                  <Text style={styles.modalButtonText}>인증 확인</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <TouchableOpacity
+          style={[styles.button, !isVerified && { backgroundColor: "#9BBCEB" }]}
+          onPress={onResetPassword}
+          disabled={!isVerified}
+        >
           <Text style={styles.buttonText}>비밀번호 재설정</Text>
         </TouchableOpacity>
-         <View style={{ alignItems: 'center', marginTop: 20 }}>
-            <TouchableOpacity onPress={() => {navigation.replace("Login")}}>
-                <Text>로그인</Text>
-            </TouchableOpacity>
+
+        <View style={{ alignItems: "center", marginTop: 20 }}>
+          <TouchableOpacity onPress={() => navigation.replace("Login")}>
+            <Text>로그인</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>
-    )
+  );
 }
 
 const styles = StyleSheet.create({

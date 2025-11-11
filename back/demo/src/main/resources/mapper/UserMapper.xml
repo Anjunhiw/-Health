@@ -39,8 +39,20 @@
 	    AND LOWER(TRIM(email)) = LOWER(TRIM(#{email}))
 	  LIMIT 1
 	</select>
-
-	
+	<!-- 비밀번호 재설정: 이메일로 비밀번호 업데이트 -->
+	<update id="updatePasswordByEmail">
+	  UPDATE users
+	  SET password = #{password}
+	  WHERE email = #{email}
+	</update>
+	<!-- 아이디 + 이메일 매칭 여부 -->
+	<select id="existsByUserIdAndEmail" resultType="int">
+	  SELECT COUNT(*)
+	  FROM users
+	  WHERE user_id = #{userId}
+	    AND LOWER(email) = LOWER(#{email})
+	  LIMIT 1
+	</select>
 	
 	
 	

@@ -19,4 +19,13 @@ public interface UserMapper {
     	    @Param("name")String name,
     	    @Param("contact")String contact,
     	    @Param("email")String email);
+    //아이디 찾기
+    int updatePasswordByEmail(@Param("email") String email,
+            @Param("password") String password);
+    //이메일 찾기
+    int existsByUserIdAndEmail(@Param("userId") String userId,
+                               @Param("email") String email);
+    int countByUserIdAndEmail( @Param("userId") String userId,
+            				   @Param("email") String email);
+
 }

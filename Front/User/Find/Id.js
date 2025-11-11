@@ -29,26 +29,32 @@ export default function Id() {
 
   // ✅ 이메일 인증코드 전송
     const onSendCode = async () => {
-      const em = email.trim();
-      if (!em) { Alert.alert("입력 오류", "이메일을 입력하세요."); return; }
-      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
-      if (!ok) { Alert.alert("형식 오류", "올바른 이메일 형식이 아닙니다."); return; }
+  const nm = name.trim();
+  const ph = contact.trim().replace(/\D/g, ""); // 숫자만
+  const em = email.trim();
 
-      try {
-        await api.post("/auth/send-code", { email: em }); // 서버가 메일 발송
-       // await api.post("/auth/ping", { test: "hello" }); 
-        // 상태 초기화 후 모달 열기 (← 성공 후)
-        setVerifyNum('');
-        setVerifyMessage('');
-        setIsVerified(false);
-        setModalVisible(true);
+  if (!nm) { Alert.alert("입력 오류", "이름을 입력하세요."); return; }
+  if (!ph) { Alert.alert("입력 오류", "연락처를 입력하세요."); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+    Alert.alert("형식 오류", "올바른 이메일 형식이 아닙니다."); return;
+  }
 
-        Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
-      } catch (e) {
-        console.log("[SendCode ERR]", e?.response?.status, e?.response?.data || e.message);
-        Alert.alert("오류", "인증코드 전송에 실패했습니다.");
-      }
-    };
+  try {
+    // ★ 서버에 name, contact, email 모두 전달
+    await api.post("/auth/send-code", { name: nm, contact: ph, email: em });
+
+    setVerifyNum('');
+    setVerifyMessage('');
+    setIsVerified(false);
+    setModalVisible(true);
+
+    Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
+  } catch (e) {
+    console.log("[SendCode ERR]", e?.response?.status, e?.response?.data || e.message);
+    const msg = e?.response?.data?.message || "인증코드 전송에 실패했습니다.";
+    Alert.alert("오류", msg);
+  }
+};
 
   const CheckVerifyNum = async () => {
     const em = email.trim();

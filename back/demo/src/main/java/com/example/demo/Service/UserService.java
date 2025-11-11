@@ -38,5 +38,13 @@ public class UserService {
 	public User findByNameContactEmail(String name, String contact, String email) {
 	    return userMapper.findByNameContactEmail(name, contact, email);
 	}
-	
+	// 비밀번호 재설정 (email 기준)
+	public int updatePasswordByEmail(String email, String newPassword) {
+	    // 운영에서는 반드시 해싱(BCrypt 등) 후 저장 권장
+	    return userMapper.updatePasswordByEmail(email, newPassword);
+	}
+	// 이메일 찾기 (userId 기준)
+	public boolean existsByUserIdAndEmail(String userId, String email) {
+	    return userMapper.existsByUserIdAndEmail(userId, email) > 0;
+	}
 }

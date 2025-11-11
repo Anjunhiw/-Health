@@ -195,35 +195,61 @@ public class SignController {
     }
     
  // ✅ 이메일 인증: 코드 발송 (검증은 나중에)
+ // ✅ 이메일 인증: 코드 발송 (아이디찾기/비번찾기 공용)
     @PostMapping("/auth/send-code")
     public ResponseEntity<?> sendCode(@RequestBody Map<String, Object> body) {
-        String email = String.valueOf(body.get("email")).trim();
-        logger.info("📨 [인증코드 발송] email={}", email);
+        // 안전 파싱
+        String userId = String.valueOf(body.getOrDefault("userId", "")).trim();     // 비번찾기용
+        String name   = String.valueOf(body.getOrDefault("name", "")).trim();       // 아이디찾기용
+        String contact= String.valueOf(body.getOrDefault("contact", "")).replaceAll("\\D", ""); // 숫자만
+        String email  = String.valueOf(body.getOrDefault("email", "")).trim();
 
+        logger.info("📨 [인증코드 발송] userId={}, name={}, contact={}, email={}",
+                userId, name, contact, email);
+
+        // 공통 유효성
+        if (email.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "이메일을 입력하세요."));
+        }
+        if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            return ResponseEntity.badRequest().body(Map.of("message", "이메일 형식이 올바르지 않습니다."));
+        }
+
+        // ▼ 분기 로직
         try {
-            // 1) 코드 생성 & 저장(5분 유효)
-        	String code = verificationStore.issue(email);
+            if (!userId.isEmpty()) {
+                // 🔐 비밀번호 찾기: 아이디+이메일 매칭 필수
+                boolean match = userService.existsByUserIdAndEmail(userId, email);
+                if (!match) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("message", "아이디와 이메일이 일치하지 않습니다."));
+                }
+            } else if (!name.isEmpty() && !contact.isEmpty()) {
+                // 🔎 아이디 찾기: 이름+연락처+이메일 모두 일치해야 함
+                User u = userService.findByNameContactEmail(name, contact, email);
+                if (u == null) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("message", "이름/연락처/이메일이 일치하는 계정을 찾을 수 없습니다."));
+                }
+            } else {
+                // 필요한 필드가 없음
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "필수 정보가 부족합니다. (아이디찾기: 이름/연락처/이메일, 비번찾기: 아이디/이메일)"));
+            }
 
-            // 2) 메일 발송 (제목/본문은 MailService.sendCode에서 고정 처리)
+            // ✅ 여기까지 통과하면 코드 발급+발송
+            String code = verificationStore.issue(email);   // 5분 TTL
             mailService.sendCode(email, code);
 
-            Map<String, Object> res = new HashMap<>();
-            res.put("ok", true);
-            return ResponseEntity.ok(res);
-
-        } catch (IllegalStateException e) { // 과도한 요청 등 정책 위반 시
-            logger.warn("⏱️ [인증코드 발송 제한] {}", e.getMessage());
-            Map<String, Object> res = new HashMap<>();
-            res.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(res);
+            return ResponseEntity.ok(Map.of("ok", true));
 
         } catch (Exception e) {
             logger.error("🔥 [인증코드 발송 실패] {}", e.getMessage());
-            Map<String, Object> res = new HashMap<>();
-            res.put("message", "send fail");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "send fail"));
         }
     }
+
  // ✅ 이메일 인증: 코드 검증
     @PostMapping("/auth/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, Object> body) {
@@ -246,6 +272,27 @@ public class SignController {
             logger.error("🔥 [인증 처리 오류] {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body(Map.of("message", "server error"));
+        }
+    }
+ // ✅ 비밀번호 재설정 (검증 완료 후 10분 내 1회만 허용)
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String email = String.valueOf(body.get("email")).trim();
+        String newPassword = String.valueOf(body.get("newPassword")).trim();
+
+        // 1) 이메일 인증 완료 상태 소비(1회성). 유효하지 않으면 거부
+        if (!verificationStore.consumeVerified(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "이메일 인증이 필요합니다."));
+        }
+
+        // 2) 비밀번호 업데이트 (서비스/매퍼 구현 필요)
+        int updated = userService.updatePasswordByEmail(email, newPassword);
+        if (updated > 0) {
+            return ResponseEntity.ok(Map.of("ok", true));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "계정을 찾을 수 없습니다."));
         }
     }
 
