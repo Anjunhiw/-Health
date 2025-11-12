@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env REACT_NATIVE_PACKAGER_HOSTNAME=10.125.47.4 expo start --host lan",
+    "start": "cross-env REACT_NATIVE_PACKAGER_HOSTNAME=10.71.83.4 expo start --host lan",
     "start:home": "cross-env-shell \"dotenv -e .env expo start --host lan\"",
     "start:lyb": "cross-env-shell \"dotenv -e .env.LYB expo start --host lan\"",
     "start:ksn": "cross-env-shell \"dotenv -e .env.KSN expo start --host lan\"",
@@ -34,16 +34,20 @@
     "expo-status-bar": "~3.0.8",
     "expo-web-browser": "~15.0.8",
     "react": "19.1.0",
-    "react-native": "0.81.5",
+    "react-native": "^0.81.5",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-pager-view": "6.9.1",
+    "react-native-picker-select": "^9.3.1",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
-    "react-native-vector-icons": "^10.3.0"
+    "react-native-vector-icons": "^10.3.0",
+    "zustand": "^5.0.8"
   },
   "private": true,
   "devDependencies": {
-    "cross-env": "^10.1.0"
+    "babel-preset-expo": "^54.0.7",
+    "cross-env": "^10.1.0",
+    "react-native-dotenv": "^3.4.11"
   }
 }

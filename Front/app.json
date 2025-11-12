@@ -32,14 +32,7 @@
     "plugins": [
       "expo-dev-client",
       "expo-web-browser"
-    ],
-    "extra": {
-      "api": {
-        "androidEmulator": "http://10.0.2.2:8080",
-        "androidDevice": "http://10.125.47.4:8080",
-        "iosSimulator": "http://localhost:8080",
-        "iosDevice": "http://10.125.47.4:8080"
-      }
-    }
+    ]
+    
   }
 }

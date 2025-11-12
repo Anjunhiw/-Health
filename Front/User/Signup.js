@@ -1,129 +1,204 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
+import { Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { API_URL } from "@env";
 import {
   TextInput,
   Text,
   View,
   Button,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
+  ScrollView,
+  Platform,
+  StatusBar,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import userStore from "../Store/userStore";
 
 export default function Signup() {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
-  const [email, setEmail] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-  const [address, setAddress] = useState("");
-  const [gender, setGender] = useState(null);
-  const [displayValue, setDisplayValue] = useState("");
+  const {
+    signupState: {
+    userId, password, passwordConfirm, name, contact,
+    email, birthdate, address, gender, isIdChecked
+  }, 
+  setSignupField, 
+  resetSignupState} = userStore();
 
   const navigation = useNavigation();
-
+//-------------------------------------------------------------------------------------------회원가입
 const handleSignup = async () => {
+  //아이디 중복여부 확인
+  if (!isIdChecked) {
+    Alert.alert("입력 오류", "아이디 중복 확인이 필요합니다.");
+    return;
+  }
+  // 🔹 입력 검증 (우선순위별)
+  if (!userId.trim()) {
+    Alert.alert("입력 오류", "아이디가 입력되지 않았습니다.");
+    return;
+  } else if (password.length < 8) {
+    Alert.alert("입력 오류", "비밀번호는 최소 8자리 이상이어야 합니다.");
+    return;
+  } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    Alert.alert("입력 오류", "비밀번호에 대소문자, 숫자, 특수문자를 모두 포함해 입력해주세요.");
+    return;
+  } else if (!passwordConfirm.trim()) {
+    Alert.alert("입력 오류", "비밀번호 확인란이 비어 있습니다.");
+    return;
+  } else if (password !== passwordConfirm) {
+    Alert.alert("입력 오류", "비밀번호가 일치하지 않습니다.");
+    return;
+  } else if (!name.trim()) {
+    Alert.alert("입력 오류", "이름이 입력되지 않았습니다.");
+    return;
+  } else if (birthdate.length !== 8 || isNaN(birthdate)) {
+    Alert.alert("입력 오류", "생년월일은 8자리 숫자(예: 19900101)로 입력해주세요.");
+    return;
+  } else if (!/^01[0-9]{8,9}$/.test(contact)) {
+    Alert.alert("입력 오류", "연락처 형식이 올바르지 않습니다. 예: 01012345678");
+    return;
+  } else if (!email.trim()) {
+    Alert.alert("입력 오류", "이메일이 입력되지 않았습니다.");
+    return;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    Alert.alert("입력 오류", "이메일 형식이 올바르지 않습니다. 예: GymSpot@email.com");
+    return;
+
+  } else if (!address.trim()) {
+    Alert.alert("입력 오류", "주소가 입력되지 않았습니다.");
+    return;
+  } else if (!gender) {
+    Alert.alert("입력 오류", "성별을 선택해주세요.");
+    return;
+  }
   try {
-    const response = await axios.post("http://10.125.47.4:8080/signup", {
-      user_id: userId,         // 아이디
-      password: password,      // 비밀번호
-      name: name,              // 이름
-      contact: contact,        // 연락처
-      email: email,            // 이메일
-      birthdate: birthdate,    // 생년월일
-      address: address,        // 주소
-      gender: gender,          // 성별
+    const response = await axios.post(`${API_URL}/signup`, {
+      user_id: userId,
+      password: password,
+      name: name,
+      contact: contact,
+      email: email,
+      birthdate: birthdate,
+      address: address,
+      gender: gender,
     });
-    console.log("데이터: ",response.data);
-    setDisplayValue(
-      `서버 응답: ${response.data}\n` +
-      `아이디: ${userId}\n` +
-      `비밀번호: ${password}\n`+
-      `이름: ${name}\n`+
-      `연락처: ${contact}\n`+
-      `이메일: ${email}\n`+
-      `생년월일: ${birthdate}\n`+
-      `주소: ${address}\n`+
-      `성별: ${gender}`
-    );
+
+    console.log("데이터: ", response.data);
+
+    if (response.data === 1) {
+      Alert.alert(
+        "회원가입 성공!",
+        "회원가입이 완료되었습니다.",
+        [{ text: "확인", onPress: () => {
+          resetSignupState(); // 가입 후 상태 초기화
+          navigation.replace("Login") }}]
+      );
+    } else {
+      Alert.alert("회원가입 실패", "서버 오류 또는 중복된 아이디입니다.");
+    }
   } catch (error) {
-    setDisplayValue(`에러 발생: ${error.message}`);
+    console.error("회원가입 에러:", error.message);
+    Alert.alert("서버 오류", "서버와의 연결에 실패했습니다. 다시 시도해주세요.");
+  }
+};
+//-------------------------------------------------------------------------------------------아이디 중복확인
+const handleCheckId = async () => {
+  if (!userId.trim()) { 
+    Alert.alert("입력 오류", "아이디를 입력해주세요.");
+    return;
+  }
+  try {
+    const response = await axios.get(`${API_URL}/check-id/${userId}`);
+    console.log("데이터:", response.data);
+    if (response.data.exists) {  
+      Alert.alert("중복된 아이디", "이미 존재하는 아이디입니다.");
+      setSignupField("isIdChecked", false);
+    } else {
+      Alert.alert("사용 가능", "사용 가능한 아이디입니다!");
+      setSignupField("isIdChecked", true);
+    }
+  } catch (error) {
+    console.log("중복확인 에러:", error.message);
+    Alert.alert("서버 오류", "아이디 중복 확인 중 문제가 발생했습니다.");
   }
 };
 
 return (
-    <KeyboardAvoidingView
+    <ScrollView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+      maximumFontSizeMultiplier={1}
     >
+      {/* <View style={styles.formContainer}> */}
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>GymSpot</Text>
       </View>
-
-      <View style={styles.inputContainer}>
-        <View style={{ flexDirection: "row" }}>
+      
+        <View style={styles.inputRow}>
         <TextInput
           placeholder="아이디"
-          style={[styles.contactInput, { width: 255 }]}
+          style={[styles.input, { flex: 1 }]}
           value={userId}
-          onChangeText={setUserId}
+          onChangeText={(text) => {
+            setSignupField("userId", text);
+            setSignupField("isIdChecked", false); // 변경 시 다시 중복확인 필요
+          }}
         />
-        <TouchableOpacity style={styles.contactButton}>
+        <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]} onPress={handleCheckId}>
           <Text style={styles.contactButtonText}>중복 확인</Text>
         </TouchableOpacity>
         </View>
         <TextInput
           placeholder="비밀번호 (특수문자 포함, 8자 이상)"
-          style={styles.input}
+          style={styles.fullWidthInput}
           secureTextEntry
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => setSignupField("password", text)}
         />
 {/* <Text>{displayValue}</Text>   콘솔 확인용 잠시    */}
         <TextInput
           placeholder="비밀번호 확인"
-          style={styles.input}
+          style={styles.fullWidthInput}
           secureTextEntry
           value={passwordConfirm}
-          onChangeText={setPasswordConfirm}
+          onChangeText={(text) => setSignupField("passwordConfirm", text)}
         />
-        <View style={{ flexDirection: "row", gap: 15}}>
+        <View style={[styles.inputRow, { gap: 10 }]}>
         <TextInput
           placeholder="이름"
-          style={[styles.input, { width: 150 }]}
+          style={[styles.input, { flex: 1 }]}
           value={name}
-          onChangeText={setName}
+          onChangeText={(text) => setSignupField("name", text)}
         />
           <TextInput
-          placeholder="생년월일 ex)19900101"
-          style={[styles.input, { width: 165 }]}
+          placeholder="생년월일(19900101)"
+          style={[styles.input, { flex: 1 }]}
           value={birthdate}
-          onChangeText={setBirthdate}
+          onChangeText={(text) => setSignupField("birthdate", text)}
+          maxLength={8}
           keyboardType="number-pad"
         />
         </View>
-        <View style={{ flexDirection: "row" }}>
+        <View style={styles.inputRow}>
           <TextInput
             placeholder="연락처"
-            style={styles.contactInput}
+            style={[styles.input, { flex: 1 }]}
             value={contact}
-            onChangeText={setContact}
+            onChangeText={(text) => setSignupField("contact", text)}
             keyboardType="phone-pad"
           />
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]}>
             <Text style={styles.contactButtonText}>인증</Text>
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row" }}>
           <TextInput
             placeholder="이메일"
-            style={styles.input}
+            style={styles.fullWidthInput}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => setSignupField("email", text)}
             keyboardType="email-address"
           />
           {/* <TouchableOpacity style={styles.contactButton}>
@@ -132,14 +207,14 @@ return (
         </View>
         <TextInput
           placeholder="주소"
-          style={styles.input}
+          style={styles.fullWidthInput}
           value={address}
-          onChangeText={setAddress}
+          onChangeText={(text) => setSignupField("address", text)}
         />
         <View style={styles.genderContainer}>
           <TouchableOpacity
             style={[styles.genderButton, gender === "male" && styles.genderSelected]}
-            onPress={() => setGender("male")}
+            onPress={() => setSignupField("gender", "male")}
           >
             <Text
               style={[
@@ -153,7 +228,7 @@ return (
 
           <TouchableOpacity
             style={[styles.genderButton, gender === "female" && styles.genderSelected]}
-            onPress={() => setGender("female")}
+            onPress={() => setSignupField("gender", "female")}
           >
             <Text
               style={[
@@ -165,28 +240,38 @@ return (
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-
+      
       <View style={styles.buttonContainer}>
        <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
   <Text style={styles.signupButtonText}>회원가입</Text>
 </TouchableOpacity>
-
       </View>
+      {/* </View> */}
 
       <View style={styles.loginContainer}>
         <Text>계정이 있으신가요?</Text>
-        <Button title="로그인" onPress={() => {navigation.replace("Login")}} color="#1E90FF" />
+        <TouchableOpacity 
+        style={styles.loginButton}
+        onPress={() => navigation.replace("Login")}>
+          <Text style={styles.loginButtonText}> 로그인</Text>
+        </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: "#fff", // 배경색 추가
+  },
+  contentContainer: {
+    flexGrow: 1,
     justifyContent: "center",
+    padding: 20,
+  },
+  formContainer: {
+    // paddingHorizontal: 20,
   },
   logoContainer: {
     alignItems: "center",
@@ -197,30 +282,30 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1E90FF",
   },
-  inputContainer: {
-    marginBottom: 20,
-    alignItems: "center",
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
-   contactInput: {
-  width: 280,      
-  backgroundColor: "#fff",
-  paddingHorizontal: 15,
-  paddingVertical: 12,
-  borderRadius: 8,
-  marginBottom: 10,
-  borderWidth: 1,
-  borderColor: "#ccc",
-  marginRight: 9,
-},
   input: {
-    width: 330,
     backgroundColor: "#fff",
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 8,
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#ccc",
+    minHeight: 48,
+  },
+  fullWidthInput: {
+    width: '100%',
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    minHeight: 48,
   },
   contactButton: {
     borderColor: '#1E90FF',
@@ -229,8 +314,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    paddingHorizontal: 9,
-    height: 40,
+    paddingHorizontal: 12,
+    height: 48,
   },
   contactButtonText: {
     fontSize: 14,
@@ -243,10 +328,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginVertical: 10,
+    gap: 20,
   },
   genderButton: {
-    width: 150,
-    marginHorizontal: 15,
+    flex: 1,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
@@ -276,13 +361,20 @@ const styles = StyleSheet.create({
   loginContainer: {
     alignItems: "center",
   },
+  loginButton: {
+    marginTop: 10,
+    backgroundColor: Platform.OS === 'ios' ? '#fff' : '#fff',
+  },
+  loginButtonText: {
+    color: Platform.OS === 'ios' ? '#1E90FF' : '#1E90FF',
+  },
   signupButton: {
   backgroundColor: '#1E90FF',
   paddingVertical: 12,
   borderRadius: 8,
   alignItems: 'center',
   justifyContent: 'center',
-  width: 330,
+  width: '100%',
 },
 signupButtonText: {
   color: '#fff',
@@ -291,4 +383,3 @@ signupButtonText: {
 },
 
 });
-

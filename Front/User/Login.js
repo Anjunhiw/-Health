@@ -1,36 +1,31 @@
-import { useState, useEffect } from "react";
-import { Text, View, Button, TextInput, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
-import Constants from 'expo-constants';
+import { useEffect, useRef, useState} from "react";
+import { Text, View, TextInput, Animated, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
+import axios from "axios";
+import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "@env";
+import userStore from "../Store/userStore";
+
+import Constants from 'expo-constants';
 
 // Google 인증을 위한 라이브러리 임포트 (수정됨)
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-// 서버 통신을 위한 axios 임포트
-import axios from 'axios'; 
 // import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 저장을 위해 필요
 
-// --- (추가) 스프링 서버 주소 ---
-// (반드시 본인의 Spring Boot 서버 IP와 포트로 변경하세요)
-const apiExtra = (Constants.expoConfig && Constants.expoConfig.extra && Constants.expoConfig.extra.api) || {};
-const API_BASE =
-  Platform.OS === 'android'
-    ? (apiExtra.androidDevice || 'http://10.125.47.4:8080')   // 실제 폰이든 개발 세션이든 항상 이 값 사용
-    : (Constants.isDevice
-        ? (apiExtra.iosDevice || 'http://10.125.47.4:8080')
-        : (apiExtra.iosSimulator || 'http://localhost:8080'));
-console.log('API_BASE =>', API_BASE);
 export default function Login() {
-  const [id, setId] = useState('');
-  const [password, setPassword] = useState('');
-  const [isChecked, setChecked] = useState(false);
-  const navigation = useNavigation();
+  const { loginState: { id, password, isChecked }, 
+          setLoginField } = userStore();
 
-  // 구글 로그인 에러 상태 추가
+  const navigation = useNavigation();
+  const bounceValue = useRef(new Animated.Value(0)).current;
+
+    // 구글 로그인 에러 상태 추가
   const [googleError, setGoogleError] = useState(null);
 
-  // --- (수정됨) Google Sign-In 설정 ---
+    // --- (수정됨) Google Sign-In 설정 ---
   // 컴포넌트 마운트 시 1회 실행하여 Google Sign-In을 설정합니다.
   useEffect(() => {
     GoogleSignin.configure({
@@ -42,13 +37,13 @@ export default function Login() {
     });
   }, []);
 
-  // --- (신규) idToken을 스프링 서버로 전송하는 함수 ---
+    // --- (신규) idToken을 스프링 서버로 전송하는 함수 ---
   const sendTokenToServer = async (idToken) => {
     try {
       setGoogleError('서버와 통신 중...');
       
       // Spring Boot 서버의 '/auth/google' 엔드포인트로 idToken을 전송합니다.
-      const response = await axios.post(`${API_BASE}/auth/google`, {
+      const response = await axios.post(`${API_URL}/auth/google`, {
         idToken: idToken,
       });
 
@@ -81,7 +76,52 @@ export default function Login() {
     }
   };
 
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bounceValue, {
+          toValue: -5, // 올라갔다가
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bounceValue, {
+          toValue: 0, // 원래 위치로
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
 
+  const handleLogin = async () => {
+    if (!id.trim() || !password.trim()) {
+      Alert.alert("입력 오류", "아이디와 비밀번호를 모두 입력해주세요.");
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${API_URL}/login`, {
+        user_id: id,
+        password: password,
+      });
+
+      console.log("로그인 응답:", res.data);
+
+      if (res.data.success) {
+        // ✅ 로그인 성공 시 user_id를 저장 (My.js에서 불러올 수 있게)
+        await AsyncStorage.setItem("user_id", id);
+
+        Alert.alert("로그인 성공", `${id}님 환영합니다!`);
+        navigation.replace("Home"); // ✅ Home 페이지로 이동
+      } else {
+        Alert.alert("로그인 실패", res.data.message || "아이디 또는 비밀번호가 올바르지 않습니다.");
+      }
+
+    } catch (err) {
+      console.error("로그인 오류:", err);
+      Alert.alert("오류", "서버 연결에 실패했습니다. 네트워크 또는 백엔드를 확인하세요.");
+    }
+  };
   // --- (수정됨) 새 Google 로그인 함수 ---
   const signIn = async () => {
     try {
@@ -117,7 +157,7 @@ export default function Login() {
       }
     }
   };
-  // --- 기존 'useEffect([response])' 및 'getUserInfo' 함수는 삭제 ---
+
 
   return (
     <KeyboardAvoidingView
@@ -125,47 +165,53 @@ export default function Login() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.logoContainer}>
+        <Animated.Image 
+                    source={require('../assets/logo (2).png')} 
+                    style={[styles.logo, { transform: [{ translateY: bounceValue }] }]} 
+                  />
         <Text style={styles.logoText}>GymSpot</Text>
       </View>
       <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="아이디"
-          value={id}
-          onChangeText={setId}
-          style={styles.input}
+        <TextInput 
+        placeholder="아이디"
+        value={id}
+        onChangeText={(text) => setLoginField("id", text)}
+        style={styles.input} 
         />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="비밀번호"
-          style={styles.input}
-          secureTextEntry
+        <TextInput 
+        value={password}
+        onChangeText={(text) => setLoginField("password", text)}
+        placeholder="비밀번호" 
+        style={styles.input} 
+        secureTextEntry 
         />
       </View>
       <View style={styles.subButtonContainer}>
         <View style={styles.Checkbox}>
           <Checkbox value={isChecked}
-            onValueChange={setChecked}
-            color={isChecked ? '#007AFF' : undefined}
+          onValueChange={(cheked) => setLoginField("isChecked", cheked)}
+          color={isChecked ? '#007AFF' : undefined}
           />
           <Text>자동 로그인</Text>
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity onPress={() => { navigation.replace("FindId") }}>
+         <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => {navigation.replace("Id")}}>
             <Text style={styles.findButtonText}>아이디 / 비밀번호 찾기</Text>
           </TouchableOpacity>
         </View>
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.loginButton} onPress={() => { navigation.replace("Home") }}>
-          <Text style={styles.loginButtonText}>로그인</Text>
-        </TouchableOpacity>
-        <View>
-          <TouchableOpacity style={styles.signupButton}
-            onPress={() => { navigation.replace("Signup") }}>
-            <Text style={styles.signupButtonText}>회원가입</Text>
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
-        </View>
+         <View>
+        <TouchableOpacity style={styles.signupButton}
+        onPress={() => {navigation.replace("Signup")}}>
+          <Text style={styles.signupButtonText}>회원가입</Text> 
+        </TouchableOpacity>
+      </View>
       </View>
       <View style={styles.orLineContainer}>
         <View style={styles.line} />
@@ -185,6 +231,8 @@ export default function Login() {
         {/* 구글 로그인 에러 메시지 표시 */}
         {googleError && <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>오류: {googleError}</Text>}
       </View>
+
+
     </KeyboardAvoidingView>
   );
 }
@@ -194,10 +242,16 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
+    marginBottom: 20
   },
   logoContainer: {
     alignItems: "center",
     marginBottom: 40,
+  },
+  logo: {
+    width: 120,
+    height: 55,
+    marginBottom: 10
   },
   logoText: {
     fontSize: 36,
@@ -217,77 +271,70 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
   },
   subButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: -15,
-    marginBottom: 15
-  },
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginTop: -15,
+  marginBottom: 15
+},
   Checkbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'row', 
+    alignItems: 'center', 
     gap: 5
   },
   buttonContainer: {
     marginBottom: 20,
     gap: 15,
   },
-
-  loginButton: {
-    backgroundColor: '#1E90FF',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  signupButton: {
-    backgroundColor: '#fff',
-    borderColor: '#1E90FF',
-    borderWidth: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  signupButtonText: {
-    color: '#1E90FF',
-    fontSize: 16,
-  },
-  findButtonText: {
-    fontSize: 14,
-  },
+  
+loginButton: {
+  backgroundColor: '#1E90FF',
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+loginButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: 'bold',
+},
+signupButton: {
+  backgroundColor: '#fff',
+  borderColor: '#1E90FF',
+  borderWidth: 1,
+   paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+signupButtonText: {
+  color: '#1E90FF',
+  fontSize: 16,
+},
+findButtonText: {
+  fontSize: 14,
+},
   orLineContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#8b8a8aff',
-  },
-  orText: {
-    marginHorizontal: 8,
-    color: '#8b8a8aff',
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    marginTop: 10,
-    
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-  }
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginVertical: 10,
+},
+line: {
+  flex: 1,
+  height: 1,
+  backgroundColor: '#8b8a8aff',
+},
+orText: {
+  marginHorizontal: 8,
+  color: '#8b8a8aff',
+},
+googleButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 7,
+  marginTop: 10
+}
 
 });
-
