@@ -1,19 +1,26 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal } from "react-native"; // ✅ Alert 추가
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { API_URL } from "@env";
+import userStore from "../../Store/userStore";
 
 export default function Id() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [contact, setContact] = useState('');
-  const [verifyNum, setVerifyNum] = useState('');
-  const [verifyMessage, setVerifyMessage] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  // Zustand 스토어에서 상태와 액션 가져오기
+  const {
+    findAccountState: { name, email, contact, verifyNum, verifyMessage, modalVisible, isVerified },
+    setFindAccountField,
+    resetVerification,
+    closeVerificationModal,
+    resetFindAccountState,
+  } = userStore();
 
   const navigation = useNavigation();
+
+  // 컴포넌트 언마운트 시 상태 초기화
+  useEffect(() => {
+    return () => resetFindAccountState();
+  }, []);
 
   // ✅ axios 인스턴스(실수 방지)
   const api = axios.create({
@@ -22,9 +29,7 @@ export default function Id() {
   });
   //이메일 변경 시 인증상태 초기화
   useEffect(() => {
-    setIsVerified(false);
-    setVerifyNum('');
-    setVerifyMessage('');
+    resetVerification();
   }, [email]);
 
   // ✅ 이메일 인증코드 전송
@@ -43,10 +48,8 @@ export default function Id() {
     // ★ 서버에 name, contact, email 모두 전달
     await api.post("/auth/send-code", { name: nm, contact: ph, email: em });
 
-    setVerifyNum('');
-    setVerifyMessage('');
-    setIsVerified(false);
-    setModalVisible(true);
+    resetVerification();
+    setFindAccountField('modalVisible', true);
 
     Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
   } catch (e) {
@@ -62,20 +65,18 @@ export default function Id() {
     if (!code) { Alert.alert("입력 오류", "인증번호를 입력하세요."); return; }
     try {
       await api.post("/auth/verify-code", { email: em, code }); // ✅ 서버에서만 검증
-      setVerifyMessage("인증되었습니다.");
-      setIsVerified(true);
-      setModalVisible(false);
+      Alert.alert("인증되었습니다.");
+      setFindAccountField('isVerified', true);
+      setFindAccountField('modalVisible', false);
     } catch (e) {
       console.log("[VerifyCode ERR]", e?.response?.status, e?.response?.data || e.message);
-      setVerifyMessage("인증번호가 일치하지 않습니다. 다시 확인해주세요.");
-      setIsVerified(false);
+      setFindAccountField('verifyMessage', "인증번호가 일치하지 않습니다. 다시 확인해주세요.");
+      setFindAccountField('isVerified', false);
     }
   };
 
     const closeModal = () => {
-      setModalVisible(false);
-      setVerifyNum('');
-      setVerifyMessage('');
+      closeVerificationModal();
     };
 
   // ✅ 아이디 찾기
@@ -126,7 +127,7 @@ export default function Id() {
           <TextInput
             placeholder="이름"
             value={name}
-            onChangeText={setName}
+            onChangeText={(text) => setFindAccountField('name', text)}
             style={styles.fullInput}
             returnKeyType="next"
           />
@@ -137,7 +138,7 @@ export default function Id() {
           <TextInput
             placeholder="연락처(숫자만)"
             value={contact}
-            onChangeText={(t) => setContact(t.replace(/\D/g, ''))} // 숫자만
+            onChangeText={(t) => setFindAccountField('contact', t.replace(/\D/g, ''))} // 숫자만
             keyboardType="phone-pad"
             style={styles.fullInput}
             maxLength={11}
@@ -150,7 +151,7 @@ export default function Id() {
           <TextInput
             placeholder="이메일 주소"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => setFindAccountField('email', text)}
             style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -173,7 +174,7 @@ export default function Id() {
           <TextInput
             placeholder="인증번호 입력"
             value={verifyNum}
-            onChangeText={(t) => setVerifyNum(t.replace(/\D/g, '').slice(0, 6))}
+            onChangeText={(t) => setFindAccountField('verifyNum', t.replace(/\D/g, '').slice(0, 6))}
             style={styles.modalInput}
             keyboardType="number-pad"
             maxLength={6}
@@ -197,8 +198,13 @@ export default function Id() {
           </View>
         </Modal>
 
-        <TouchableOpacity style={styles.button} onPress={onFindId}>
-          <Text style={styles.buttonText}>아이디 찾기</Text>
+        <TouchableOpacity 
+        style={[styles.button, !isVerified && { backgroundColor: "#9BBCEB"}]} 
+        onPress={onFindId}
+        disabled={!isVerified}
+        >
+          <Text 
+          style={styles.buttonText}>아이디 찾기</Text>
         </TouchableOpacity>
 
         <View style={{ alignItems: 'center', marginTop: 20 }}>
@@ -337,4 +343,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-

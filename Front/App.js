@@ -5,6 +5,7 @@ import Login from "./User/Login";
 import Signup from "./User/Signup";
 import Id from "./User/Find/Id";
 import Pw from "./User/Find/Pw";
+import Reset_Pw from "./User/Find/Reset_Pw";
 import Home from "./Main/Home/Home";
 import Pg_Detail from "./Main/Home/Program_Detail";
 import Community from "./Main/Community/Community";
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Screen name="Signup" component={Signup} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Id" component={Id} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Pw" component={Pw} options={{headerShown: false, animation: 'simple_push'}}/>
+        <Stack.Screen name="Reset_Pw" component={Reset_Pw} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Home" component={Home} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Pg_Detail" component={Pg_Detail} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Community" component={Community} options={{headerShown: false, animation: 'simple_push'}}/>

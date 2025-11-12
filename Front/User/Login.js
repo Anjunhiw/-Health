@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef} from "react";
+import { useEffect, useRef} from "react";
 import { Text, View, TextInput, Animated, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Checkbox from 'expo-checkbox';
@@ -6,11 +6,12 @@ import axios from "axios";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@env";
+import userStore from "../Store/userStore";
 
 export default function Login() {
-  const [ id, setId ] = useState('');
-  const [ password, setPassword ] = useState('');
-  const [ isChecked, setChecked ] = useState(false);
+  const { loginState: { id, password, isChecked }, 
+          setLoginField } = userStore();
+
   const navigation = useNavigation();
   const bounceValue = useRef(new Animated.Value(0)).current;
 
@@ -78,12 +79,12 @@ export default function Login() {
         <TextInput 
         placeholder="아이디"
         value={id}
-        onChangeText={setId}
+        onChangeText={(text) => setLoginField("id", text)}
         style={styles.input} 
         />
         <TextInput 
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => setLoginField("password", text)}
         placeholder="비밀번호" 
         style={styles.input} 
         secureTextEntry 
@@ -92,7 +93,7 @@ export default function Login() {
       <View style={styles.subButtonContainer}>
         <View style={styles.Checkbox}>
           <Checkbox value={isChecked}
-          onValueChange={setChecked}
+          onValueChange={(cheked) => setLoginField("isChecked", cheked)}
           color={isChecked ? '#007AFF' : undefined}
           />
           <Text>자동 로그인</Text>

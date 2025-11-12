@@ -14,19 +14,16 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-
+import userStore from "../Store/userStore";
 
 export default function Signup() {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
-  const [email, setEmail] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-  const [address, setAddress] = useState("");
-  const [gender, setGender] = useState(null);
-  const [isIdChecked, setIsIdChecked] = useState(false);
+  const {
+    signupState: {
+    userId, password, passwordConfirm, name, contact,
+    email, birthdate, address, gender, isIdChecked
+  }, 
+  setSignupField, 
+  resetSignupState} = userStore();
 
   const navigation = useNavigation();
 //-------------------------------------------------------------------------------------------회원가입
@@ -93,7 +90,9 @@ const handleSignup = async () => {
       Alert.alert(
         "회원가입 성공!",
         "회원가입이 완료되었습니다.",
-        [{ text: "확인", onPress: () => navigation.replace("Login") }]
+        [{ text: "확인", onPress: () => {
+          resetSignupState(); // 가입 후 상태 초기화
+          navigation.replace("Login") }}]
       );
     } else {
       Alert.alert("회원가입 실패", "서버 오류 또는 중복된 아이디입니다.");
@@ -114,10 +113,10 @@ const handleCheckId = async () => {
     console.log("데이터:", response.data);
     if (response.data.exists) {  
       Alert.alert("중복된 아이디", "이미 존재하는 아이디입니다.");
-      setIsIdChecked(false)
+      setSignupField("isIdChecked", false);
     } else {
       Alert.alert("사용 가능", "사용 가능한 아이디입니다!");
-      setIsIdChecked(true)
+      setSignupField("isIdChecked", true);
     }
   } catch (error) {
     console.log("중복확인 에러:", error.message);
@@ -143,10 +142,8 @@ return (
           style={[styles.input, { flex: 1 }]}
           value={userId}
           onChangeText={(text) => {
-            if (text !== userId) {
-              setIsIdChecked(false);
-            }
-            setUserId(text);
+            setSignupField("userId", text);
+            setSignupField("isIdChecked", false); // 변경 시 다시 중복확인 필요
           }}
         />
         <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]} onPress={handleCheckId}>
@@ -158,7 +155,7 @@ return (
           style={styles.fullWidthInput}
           secureTextEntry
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => setSignupField("password", text)}
         />
 {/* <Text>{displayValue}</Text>   콘솔 확인용 잠시    */}
         <TextInput
@@ -166,20 +163,20 @@ return (
           style={styles.fullWidthInput}
           secureTextEntry
           value={passwordConfirm}
-          onChangeText={setPasswordConfirm}
+          onChangeText={(text) => setSignupField("passwordConfirm", text)}
         />
         <View style={[styles.inputRow, { gap: 10 }]}>
         <TextInput
           placeholder="이름"
           style={[styles.input, { flex: 1 }]}
           value={name}
-          onChangeText={setName}
+          onChangeText={(text) => setSignupField("name", text)}
         />
           <TextInput
           placeholder="생년월일(19900101)"
           style={[styles.input, { flex: 1 }]}
           value={birthdate}
-          onChangeText={setBirthdate}
+          onChangeText={(text) => setSignupField("birthdate", text)}
           maxLength={8}
           keyboardType="number-pad"
         />
@@ -189,7 +186,7 @@ return (
             placeholder="연락처"
             style={[styles.input, { flex: 1 }]}
             value={contact}
-            onChangeText={setContact}
+            onChangeText={(text) => setSignupField("contact", text)}
             keyboardType="phone-pad"
           />
           <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]}>
@@ -201,7 +198,7 @@ return (
             placeholder="이메일"
             style={styles.fullWidthInput}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => setSignupField("email", text)}
             keyboardType="email-address"
           />
           {/* <TouchableOpacity style={styles.contactButton}>
@@ -212,12 +209,12 @@ return (
           placeholder="주소"
           style={styles.fullWidthInput}
           value={address}
-          onChangeText={setAddress}
+          onChangeText={(text) => setSignupField("address", text)}
         />
         <View style={styles.genderContainer}>
           <TouchableOpacity
             style={[styles.genderButton, gender === "male" && styles.genderSelected]}
-            onPress={() => setGender("male")}
+            onPress={() => setSignupField("gender", "male")}
           >
             <Text
               style={[
@@ -231,7 +228,7 @@ return (
 
           <TouchableOpacity
             style={[styles.genderButton, gender === "female" && styles.genderSelected]}
-            onPress={() => setGender("female")}
+            onPress={() => setSignupField("gender", "female")}
           >
             <Text
               style={[

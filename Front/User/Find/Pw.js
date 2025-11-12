@@ -3,16 +3,16 @@ import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingVi
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { API_URL } from "@env";
+import userStore from "../../Store/userStore";
 
 export default function Pw() {
-  // ★ 추가: 아이디 상태
-  const [userId, setUserId] = useState("");
-
-  const [email, setEmail] = useState("");
-  const [verifyNum, setVerifyNum] = useState("");
-  const [verifyMessage, setVerifyMessage] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const {
+    findAccountState: { userId, email, verifyNum, verifyMessage, modalVisible, isVerified },
+    setFindAccountField,
+    resetVerification,
+    closeVerificationModal,
+    resetFindAccountState,
+  } = userStore();
 
   const navigation = useNavigation();
 
@@ -35,10 +35,8 @@ const onSendCode = async () => {
     // ★ userId도 같이 보냄
     await api.post("/auth/send-code", { userId: uid, email: em });
 
-    setVerifyNum("");
-    setVerifyMessage("");
-    setIsVerified(false);
-    setModalVisible(true);
+    resetVerification();
+    setFindAccountField('modalVisible', true);
     Alert.alert("안내", "인증코드를 보냈습니다. 메일함을 확인하세요.");
   } catch (e) {
     const msg = e?.response?.data?.message || "인증코드 전송에 실패했습니다.";
@@ -59,31 +57,31 @@ const onSendCode = async () => {
 
     try {
       await api.post("/auth/verify-code", { email: em, code });
-      setVerifyMessage("인증되었습니다.");
-      setIsVerified(true);
-      setModalVisible(false);
+      Alert.alert("인증되었습니다.");
+      setFindAccountField("isVerified", true);
+      closeVerificationModal();
     } catch (e) {
       console.log("[VerifyCode ERR]", e?.response?.status, e?.response?.data || e.message);
-      setVerifyMessage("인증번호가 일치하지 않습니다. 다시 확인해주세요.");
-      setIsVerified(false);
+      setFindAccountField("verifyMessage", "인증번호가 일치하지 않습니다.");
+      setFindAccountField("isVerified", false);
     }
   };
 
   const closeModal = () => {
-    setModalVisible(false);
-    setVerifyNum("");
-    setVerifyMessage("");
+    closeVerificationModal();
   };
 
   // 비밀번호 재설정(다음 화면 이동/토큰 발급 등)
   const onResetPassword = () => {
-    if (!isVerified) {
-      Alert.alert("인증 필요", "이메일 인증을 먼저 완료해주세요.");
-      return;
-    }
+    // if (!isVerified) {
+    //   Alert.alert("인증 필요", "이메일 인증을 먼저 완료해주세요.");
+    //   return;
+    // }
     // 필요 시 userId와 email을 다음 화면으로 넘길 수 있음
     // navigation.navigate('PwReset', { userId, email });
     Alert.alert("안내", `인증 완료. 비밀번호 재설정 절차로 이동합니다.\n아이디: ${userId || "(미입력)"}`);
+    navigation.replace('Reset_Pw');
+    resetFindAccountState(); // 상태 초기화
   };
 
   return (
@@ -106,7 +104,7 @@ const onSendCode = async () => {
           <TextInput
             placeholder="아이디"
             value={userId}
-            onChangeText={setUserId}
+            onChangeText={(t) => setFindAccountField("userId", t)}
             style={styles.fullInput}
             autoCapitalize="none"
             returnKeyType="next"
@@ -118,7 +116,7 @@ const onSendCode = async () => {
           <TextInput
             placeholder="이메일 주소"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(t) => setFindAccountField("email", t)}
             style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -136,12 +134,12 @@ const onSendCode = async () => {
               <TextInput
                 placeholder="인증번호(6자리)"
                 value={verifyNum}
-                onChangeText={(t) => setVerifyNum(t.replace(/\D/g, "").slice(0, 6))}
+                onChangeText={(t) => setFindAccountField("verifyNum", t.replace(/\D/g, "").slice(0, 6))}
                 style={styles.modalInput}
                 keyboardType="number-pad"
                 maxLength={6}
               />
-              <Text style={[styles.modalMessageText, { color: isVerified ? "green" : "red" }]}>{verifyMessage}</Text>
+              <Text style={styles.modalMessageText}>{verifyMessage}</Text>
               <View style={styles.modalButtonContainer}>
                 <TouchableOpacity style={[styles.modalButton, styles.modalCloseButton]} onPress={closeModal}>
                   <Text style={styles.modalButtonText}>닫기</Text>
@@ -157,7 +155,7 @@ const onSendCode = async () => {
         <TouchableOpacity
           style={[styles.button, !isVerified && { backgroundColor: "#9BBCEB" }]}
           onPress={onResetPassword}
-          disabled={!isVerified}
+          // disabled={!isVerified}
         >
           <Text style={styles.buttonText}>비밀번호 재설정</Text>
         </TouchableOpacity>
@@ -209,6 +207,17 @@ const styles = StyleSheet.create({
   activeText: {
     color: '#007AFF', // 활성화 색상
     fontWeight: 'bold',
+  },
+   fieldGroup: { marginTop: 10, marginBottom: 10 },
+  fullInput: {
+    width: '100%',
+    backgroundColor: "#fff",
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    fontSize: 16,
   },
     inputContainer: {
     flexDirection: 'row',
@@ -293,6 +302,7 @@ const styles = StyleSheet.create({
   modalMessageText: {
     marginBottom: 15,
     fontSize: 14,
+    color: 'red',
   },
   modalButtonContainer: {
     flexDirection: 'row',

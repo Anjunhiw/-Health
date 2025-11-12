@@ -61,7 +61,7 @@ export default function Home() {
                 {item.icon && <Image source={item.icon} style={styles.gymIcon} />}
                 <View style={styles.textContainer}>
                   <Text style={styles.gymNameText}>{item.name}</Text>
-                  <Text style={styles.wishlistText}>❤️ 찜 0개</Text>
+                  <Text style={styles.wishlistText}>찜 0개</Text>
                 </View>
               </View>
             </TouchableOpacity>
