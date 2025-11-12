@@ -8,7 +8,7 @@
     "start:home": "cross-env-shell \"dotenv -e .env expo start --host lan\"",
     "start:lyb": "cross-env-shell \"dotenv -e .env.LYB expo start --host lan\"",
     "start:ksn": "cross-env-shell \"dotenv -e .env.KSN expo start --host lan\"",
-    "start:ihl": "cross-env-shell \"dotenv -e .env.ICL expo start --host lan\"",
+    "start:icl": "cross-env-shell \"dotenv -e .env.ICL expo start --host lan\"",
     "start:ajh": "cross-env-shell \"dotenv -e .env.AJH expo start --host lan\"",
     "start:dev": "expo start --dev-client --lan",
     "start:dev:tunnel": "expo start --dev-client --tunnel",
