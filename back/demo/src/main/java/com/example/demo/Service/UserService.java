@@ -47,4 +47,16 @@ public class UserService {
 	public boolean existsByUserIdAndEmail(String userId, String email) {
 	    return userMapper.existsByUserIdAndEmail(userId, email) > 0;
 	}
+	//userId+email 확인 후 비번 변경
+	public boolean resetPasswordMinimal(String userId, String email, String newPassword) {
+	    // 1) 사용자 존재 확인
+	    boolean exists = existsByUserIdAndEmail(userId, email);                          
+	    if (!exists) return false;
+
+	    // 2) 이메일 기준 업데이트 (현재 최소 구현)
+	    int updated = updatePasswordByEmail(email, newPassword);
+	    return updated > 0;
+	}    
+	
+	
 }

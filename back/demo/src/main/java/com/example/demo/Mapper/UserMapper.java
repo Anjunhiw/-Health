@@ -12,8 +12,8 @@ import com.example.demo.Model.User;
 public interface UserMapper {
 	int InsertUser(User user);
 	List<User> SelectUser();
-	User findByUserId(String userId);
-	int existsByUserId(String userId); // 아이디 중복확인
+	User findByUserId(@Param("userId") String userId);
+	int existsByUserId(@Param("userId") String userId); // 아이디 중복확인
 	int updateUser(@Param("userId") String userId, @Param("user") User user);//마이페이지 수정
     User findByNameContactEmail( // 이름, 전화번호, 이메일로 아이디 찾기
     	    @Param("name")String name,

@@ -35,6 +35,7 @@ import com.example.demo.Service.MailService;
         "http://192.168.219.202:8081",
         "http://192.168.219.116:8081",
         "http://10.42.56.241:8081",
+        "http://192.168.219.125:8081",
         "http://localhost:8081"
 })
 
@@ -277,25 +278,25 @@ public class SignController {
  // ✅ 비밀번호 재설정 (검증 완료 후 10분 내 1회만 허용)
     @PostMapping("/auth/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
-        String email = String.valueOf(body.get("email")).trim();
-        String newPassword = String.valueOf(body.get("newPassword")).trim();
+        String email       = String.valueOf(body.getOrDefault("email", "")).trim();
+        String newPassword = String.valueOf(body.getOrDefault("newPassword", "")).trim();
 
-        // 1) 이메일 인증 완료 상태 소비(1회성). 유효하지 않으면 거부
-        if (!verificationStore.consumeVerified(email)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "이메일 인증이 필요합니다."));
+        logger.info("🔐 [reset-password] email={}, pwLen={}", email, newPassword.length());
+
+        // 0) 값 검증
+        if (email.isEmpty() || newPassword.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "invalid request"));
         }
 
-        // 2) 비밀번호 업데이트 (서비스/매퍼 구현 필요)
+        // 1) DB 업데이트 (현재는 평문 저장 — 운영 전 BCrypt로 교체 권장)
         int updated = userService.updatePasswordByEmail(email, newPassword);
         if (updated > 0) {
-            return ResponseEntity.ok(Map.of("ok", true));
+            return ResponseEntity.ok(Map.of("reset", true));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "계정을 찾을 수 없습니다."));
+                                 .body(Map.of("message", "user not found"));
         }
     }
-
 
     
 

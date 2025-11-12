@@ -80,7 +80,10 @@ const onSendCode = async () => {
     // 필요 시 userId와 email을 다음 화면으로 넘길 수 있음
     // navigation.navigate('PwReset', { userId, email });
     Alert.alert("안내", `인증 완료. 비밀번호 재설정 절차로 이동합니다.\n아이디: ${userId || "(미입력)"}`);
-    navigation.replace('Reset_Pw');
+        navigation.replace("Reset_Pw", {                       // <<----------------------- 수정 또는 추가
+          userId: userId || "",
+          email: email || "",
+        });
     resetFindAccountState(); // 상태 초기화
   };
 
