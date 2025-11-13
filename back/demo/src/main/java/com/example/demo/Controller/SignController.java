@@ -36,6 +36,7 @@ import com.example.demo.Service.MailService;
         "http://192.168.219.116:8081",
         "http://10.42.56.241:8081",
         "http://192.168.219.125:8081",
+        "http://10.71.83.4:8081",
         "http://localhost:8081"
 })
 
@@ -114,7 +115,38 @@ public class SignController {
         }
         return response;
     }
+    @PostMapping("/auth/google")
+    public Map<String, Object> googleLogin(@RequestBody Map<String, String> payload) {
+        
+        String idToken = payload.get("idToken");
+        logger.info("✅ 구글 로그인 요청 들어옴. idToken: {}", idToken);
 
+        // (중요) 여기에 idToken을 검증하고, 
+        // 이미 회원이면 JWT를 발급하고, 
+        // 회원이 아니면 회원가입 처리 후 JWT를 발급하는 로직이 필요합니다.
+        
+        // --- (임시 응답) ---
+        // 우선은 정상적으로 토큰을 받았다는 의미로 임시 JWT를 발급합니다.
+        // 추후에 Google 토큰 검증 로직으로 교체해야 합니다.
+        Map<String, Object> response = new HashMap<>();
+        
+        if (idToken != null && !idToken.isEmpty()) {
+            // TODO: idToken 검증 로직 (e.g., GoogleIdTokenVerifier 사용)
+            
+            // 임시로 "가짜" JWT 토큰 발급
+            String fakeJwt = "임시_JWT_토큰_입니다." + idToken.substring(0, 10); 
+            
+            response.put("success", true);
+            response.put("access_token", fakeJwt); // Login.js가 이 키를 기다립니다.
+            logger.info("구글 로그인 성공 (임시), JWT 발급: {}", fakeJwt);
+        } else {
+            response.put("success", false);
+            response.put("message", "idToken이 없습니다.");
+            logger.warn("구글 로그인 실패: idToken 없음");
+        }
+        
+        return response;
+    }
     // 게시글------------------------------------------------------------------------------------------------
     @PostMapping("/write")
     public ResponseEntity<String> writePost(@RequestBody Community community) {
@@ -275,6 +307,7 @@ public class SignController {
                                  .body(Map.of("message", "server error"));
         }
     }
+    
  // ✅ 비밀번호 재설정 (검증 완료 후 10분 내 1회만 허용)
     @PostMapping("/auth/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
@@ -297,6 +330,7 @@ public class SignController {
                                  .body(Map.of("message", "user not found"));
         }
     }
+    
 
     
 

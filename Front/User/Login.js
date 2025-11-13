@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@env";
 import userStore from "../Store/userStore";
 
-import Constants from 'expo-constants';
+//import Constants from 'expo-constants';
 
 // Google 인증을 위한 라이브러리 임포트 (수정됨)
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
