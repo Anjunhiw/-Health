@@ -146,7 +146,7 @@ return (
             setSignupField("isIdChecked", false); // 변경 시 다시 중복확인 필요
           }}
         />
-        <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]} onPress={handleCheckId}>
+        <TouchableOpacity style={styles.contactButton} onPress={handleCheckId}>
           <Text style={styles.contactButtonText}>중복 확인</Text>
         </TouchableOpacity>
         </View>
@@ -184,26 +184,23 @@ return (
         <View style={styles.inputRow}>
           <TextInput
             placeholder="연락처"
-            style={[styles.input, { flex: 1 }]}
+            style={[styles.fullWidthInput, { flex: 1 }]}
             value={contact}
             onChangeText={(text) => setSignupField("contact", text)}
             keyboardType="phone-pad"
           />
-          <TouchableOpacity style={[styles.contactButton, { marginLeft: 10 }]}>
-            <Text style={styles.contactButtonText}>인증</Text>
-          </TouchableOpacity>
         </View>
-        <View style={{ flexDirection: "row" }}>
+        <View style={styles.inputRow}>
           <TextInput
             placeholder="이메일"
-            style={styles.fullWidthInput}
+            style={[styles.input, { flex: 1 }]}
             value={email}
             onChangeText={(text) => setSignupField("email", text)}
             keyboardType="email-address"
           />
-          {/* <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={styles.contactButton}>
             <Text style={styles.contactButtonText}>인증</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
         <TextInput
           placeholder="주소"
@@ -316,6 +313,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     height: 48,
+    marginLeft: 10,
   },
   contactButtonText: {
     fontSize: 14,
