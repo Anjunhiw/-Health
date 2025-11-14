@@ -36,8 +36,13 @@ import com.example.demo.Service.MailService;
         "http://192.168.219.116:8081",
         "http://10.42.56.241:8081",
         "http://192.168.219.125:8081",
+        "http://10.42.56.241:8081",
         "http://10.71.83.4:8081",
-        "http://localhost:8081"
+        "http://localhost:8081",
+        "http://192.168.219.97:8081",
+        "http://192.168.219.123:8081",
+        
+        
 })
 
 public class SignController {
@@ -232,15 +237,15 @@ public class SignController {
     @PostMapping("/auth/send-code")
     public ResponseEntity<?> sendCode(@RequestBody Map<String, Object> body) {
         // 안전 파싱
-        String userId = String.valueOf(body.getOrDefault("userId", "")).trim();     // 비번찾기용
-        String name   = String.valueOf(body.getOrDefault("name", "")).trim();       // 아이디찾기용
-        String contact= String.valueOf(body.getOrDefault("contact", "")).replaceAll("\\D", ""); // 숫자만
-        String email  = String.valueOf(body.getOrDefault("email", "")).trim();
+        String userId  = String.valueOf(body.getOrDefault("userId", "")).trim();          // 비번찾기용
+        String name    = String.valueOf(body.getOrDefault("name", "")).trim();            // 아이디찾기용
+        String contact = String.valueOf(body.getOrDefault("contact", "")).replaceAll("\\D", ""); // 숫자만
+        String email   = String.valueOf(body.getOrDefault("email", "")).trim();
 
         logger.info("📨 [인증코드 발송] userId={}, name={}, contact={}, email={}",
                 userId, name, contact, email);
 
-        // 공통 유효성
+        // 0) 공통: 이메일 유효성
         if (email.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "이메일을 입력하세요."));
         }
@@ -248,31 +253,50 @@ public class SignController {
             return ResponseEntity.badRequest().body(Map.of("message", "이메일 형식이 올바르지 않습니다."));
         }
 
-        // ▼ 분기 로직
+        // 1) 어떤 용도로 온 요청인지 구분
+        boolean forResetPw = !userId.isEmpty();              // 비밀번호 찾기
+        boolean forFindId  = !name.isEmpty() && !contact.isEmpty(); // 아이디 찾기
+        boolean forSignup  = !forResetPw && !forFindId;      // 나머지 = 회원가입
+
         try {
-            if (!userId.isEmpty()) {
-                // 🔐 비밀번호 찾기: 아이디+이메일 매칭 필수
+            if (forResetPw) {
+                // 🔐 비밀번호 찾기: 아이디 + 이메일 매칭
                 boolean match = userService.existsByUserIdAndEmail(userId, email);
                 if (!match) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of("message", "아이디와 이메일이 일치하지 않습니다."));
                 }
-            } else if (!name.isEmpty() && !contact.isEmpty()) {
-                // 🔎 아이디 찾기: 이름+연락처+이메일 모두 일치해야 함
+                logger.info("🔐 [비밀번호 찾기용 인증코드 발송] userId={}, email={}", userId, email);
+
+            } else if (forFindId) {
+                // 🔎 아이디 찾기: 이름 + 연락처 + 이메일
                 User u = userService.findByNameContactEmail(name, contact, email);
                 if (u == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of("message", "이름/연락처/이메일이 일치하는 계정을 찾을 수 없습니다."));
                 }
+                logger.info("🔎 [아이디 찾기용 인증코드 발송] name={}, contact={}, email={}",
+                        name, contact, email);
+
+            } else if (forSignup) {
+                // 🆕 회원가입: email만 있는 경우
+                logger.info("🆕 [회원가입용 이메일 인증코드 발송] email={}", email);
+
+                // 필요하면: 이미 가입된 이메일인지 체크도 가능
+                // boolean emailUsed = userService.existsByEmail(email);
+                // if (emailUsed) { ... }
+
             } else {
-                // 필요한 필드가 없음
+                // 논리상 여긴 안 오지만 안전용
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "필수 정보가 부족합니다. (아이디찾기: 이름/연락처/이메일, 비번찾기: 아이디/이메일)"));
+                        .body(Map.of("message", "잘못된 요청입니다."));
             }
 
-            // ✅ 여기까지 통과하면 코드 발급+발송
+            // 2) 여기까지 통과하면 공통: 코드 발급 + 메일 발송
             String code = verificationStore.issue(email);   // 5분 TTL
             mailService.sendCode(email, code);
+
+            logger.info("✅ [인증코드 발급 완료] email={}, code={}", email, code);
 
             return ResponseEntity.ok(Map.of("ok", true));
 
@@ -331,7 +355,7 @@ public class SignController {
         }
     }
     
-
+    
     
 
     }
