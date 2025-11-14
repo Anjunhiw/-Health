@@ -11,10 +11,11 @@ export default function Community() {
     const [selectedTag, setSelectedTag] = useState('전체');
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
+
     const tags = ['전체', '정보', '식단', '할인', '운동인증', '후기'];
     const navigation = useNavigation();
 
-    
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -27,6 +28,16 @@ export default function Community() {
             }
         };
         fetchPosts();
+    }, []);
+
+    useEffect(() => {
+        const loadUserName = async () => {
+            const storedId = await AsyncStorage.getItem("user_id");
+            if (storedId) {
+                setCurrentUser(storedId);
+            }
+        };
+        loadUserName();
     }, []);
 
     return(

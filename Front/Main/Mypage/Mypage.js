@@ -12,6 +12,7 @@ export default function My() {
     const [userInfo, setUserInfo] = useState([]);
     const [editingField, setEditingField] = useState(false);
     const [tempInfo, setTempInfo] = useState([]);
+
     const navigation = useNavigation();
 
 
@@ -143,6 +144,13 @@ export default function My() {
                     ) : (
                         <Text>불러오는 중...</Text>
                     )}
+                </View>
+
+                <View style={styles.card}>
+                    <TouchableOpacity
+                    onPress={() => navigation.navigate("Calendar")}>
+                        <Text>캘린더</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
