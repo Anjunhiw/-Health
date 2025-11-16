@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal } from "react-native"; // ✅ Alert 추가
+import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal, ActivityIndicator } from "react-native"; // ✅ Alert 추가
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { API_URL } from "@env";
@@ -8,7 +8,7 @@ import userStore from "../../Store/userStore";
 export default function Id() {
   // Zustand 스토어에서 상태와 액션 가져오기
   const {
-    findAccountState: { name, email, contact, verifyNum, verifyMessage, modalVisible, isVerified },
+    findAccountState: { name, email, contact, verifyNum, verifyMessage, modalVisible, isVerified, loading },
     setFindAccountField,
     resetVerification,
     closeVerificationModal,
@@ -45,6 +45,7 @@ export default function Id() {
   }
 
   try {
+    setFindAccountField('loading', true);
     // ★ 서버에 name, contact, email 모두 전달
     await api.post("/auth/send-code", { name: nm, contact: ph, email: em });
 
@@ -149,17 +150,53 @@ export default function Id() {
         {/* 이메일 + 인증 버튼 */}
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder="이메일 주소"
+            placeholder="이메일"
             value={email}
-            onChangeText={(text) => setFindAccountField('email', text)}
+            onChangeText={(text) => { setFindAccountField('email', text);
+              if(isVerified) {
+                setFindAccountField('isVerified', false);
+              }
+            }}
             style={styles.input}
             keyboardType="email-address"
-            autoCapitalize="none"
+            editable={!isVerified}
           />
-          <TouchableOpacity style={styles.contactButton} onPress={onSendCode}>
-            <Text style={styles.contactButtonText}>인증</Text>
+          <TouchableOpacity 
+          style={[styles.contactButton, isVerified && styles.disabledButton]} 
+          onPress={onSendCode}
+          disabled={isVerified}>
+            <Text style={[styles.contactButtonText, isVerified && styles.disabledButtonText]}>인증</Text>
           </TouchableOpacity>
         </View>
+
+        {loading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.3)", // 반투명 배경
+              zIndex: 1000,
+            }}
+          >
+            <View
+              style={{
+                padding: 20,
+                backgroundColor: "#fff",
+                borderRadius: 10,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <ActivityIndicator size="small" color="#000" />
+              <Text style={{ marginLeft: 10 }}>잠시만 기다려주세요...</Text>
+            </View>
+          </View>
+        )}
 
         {/* 인증 모달 */}
         <Modal
@@ -279,6 +316,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+    disabledButton: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ccc',
+  },
+  disabledButtonText: {
+    color: '#aaa',
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   // Modal Styles

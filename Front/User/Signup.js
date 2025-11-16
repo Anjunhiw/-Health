@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  StatusBar,
+  Modal
 } from "react-native";
 import userStore from "../Store/userStore";
 
@@ -20,13 +20,14 @@ export default function Signup() {
   const {
     signupState: {
     userId, password, passwordConfirm, name, contact,
-    email, birthdate, address, gender, isIdChecked
+    email, birthdate, address, gender, isIdChecked,
+    verifyNum, verifyMessage, modalVisible
   }, 
+  closeSignupModal, 
   setSignupField, 
   resetSignupState} = userStore();
 
   const navigation = useNavigation();
-  const [verificationCode, setVerificationCode] = useState(""); // 사용자가 입력하는 코드
   const [isEmailVerified, setIsEmailVerified] = useState(false); // 인증 완료 여부
 //-------------------------------------------------------------------------------------------회원가입
 const handleSignup = async () => {
@@ -145,15 +146,16 @@ const handleCheckId = async () => {
       .then((res) => {
         console.log("send-code 응답:", res.data);
         setIsEmailVerified(false); // 새로 보냈으니 인증 다시 필요
-        setVerificationCode("");
+        setSignupField('verifyNum', ''); // ✅ setSignupField 사용
         Alert.alert("안내", "입력하신 이메일로 인증코드를 보냈습니다.");
+        setSignupField('modalVisible', true); // ✅ setSignupField 사용
       });
   };
 
 // -------------------------------------------------------------------------------- 이메일 인증코드 검증
 const handleVerifyEmailCode = async () => {
   const em = email.trim();
-  const code = verificationCode.trim();
+  const code = verifyNum.trim();
 
   if (!em) {
     Alert.alert("입력 오류", "이메일을 먼저 입력하고 인증코드를 요청하세요.");
@@ -169,12 +171,12 @@ const handleVerifyEmailCode = async () => {
       email: em,
       code,
     });
-
     console.log("verify-code 응답:", res.data);
 
     if (res.data.verified) {
       setIsEmailVerified(true);
       Alert.alert("안내", "이메일 인증이 완료되었습니다.");
+      setSignupField('modalVisible', false); // ✅ setSignupField 사용
     } else {
       // 이 경우는 거의 없지만, 혹시 대비
       setIsEmailVerified(false);
@@ -193,16 +195,9 @@ const handleVerifyEmailCode = async () => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
+  const closeModal = () => {
+    closeSignupModal(); 
+  };
     
 return (
     <ScrollView
@@ -275,44 +270,60 @@ return (
             placeholder="이메일"
             style={[styles.input, { flex: 1 }]}
             value={email}
-            onChangeText={(text) => setSignupField("email", text)}
+            onChangeText={(text) => {
+              setSignupField("email", text);
+              if (isEmailVerified) {
+                setIsEmailVerified(false); // 이메일 변경 시 인증 상태 초기화
+              }
+            }}
             keyboardType="email-address"
+            editable={!isEmailVerified} // 인증 완료 시 수정 불가
           />
-          <TouchableOpacity style={styles.contactButton}
-             onPress={handleSendEmailCode}>
-            <Text style={styles.contactButtonText}>인증</Text>
+          <TouchableOpacity 
+            style={[styles.contactButton, isEmailVerified && styles.disabledButton]}
+            onPress={handleSendEmailCode}
+            disabled={isEmailVerified}
+          >
+            <Text style={[styles.contactButtonText, isEmailVerified && styles.disabledButtonText]}>인증</Text>
           </TouchableOpacity>
         </View>
 
-
-
-    {/* 인증코드 입력 + 확인 */}
-          <View style={styles.inputRow}>
-            <TextInput
-              placeholder="이메일로 받은 인증코드"
-              style={[styles.input, { flex: 1 }]}
-              value={verificationCode}
-              onChangeText={setVerificationCode}
-              keyboardType="number-pad"
-              maxLength={6}
-            />
-            <TouchableOpacity
-              style={styles.contactButton}
-              onPress={handleVerifyEmailCode}
-            >
-              <Text style={styles.contactButtonText}>코드 확인</Text>
-            </TouchableOpacity>
+          {/* 인증 모달 */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>인증번호를 입력해주세요.</Text>
+          <TextInput
+            placeholder="인증번호 입력"
+            value={verifyNum}
+            onChangeText={(t) => setSignupField('verifyNum', t.replace(/\D/g, '').slice(0, 6))}
+            style={styles.modalInput}
+            keyboardType="number-pad"
+            maxLength={6}
+                />
+                <Text style={[styles.modalMessageText, { color: isEmailVerified ? 'green' : 'red' }]}>{verifyMessage}</Text>
+                <View style={styles.modalButtonContainer}>
+                    <TouchableOpacity 
+                        style={[styles.modalButton, styles.modalCloseButton]} 
+                        onPress={() => closeModal()}
+                    >
+                        <Text style={styles.modalButtonText}>닫기</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.modalButton} 
+                        onPress={handleVerifyEmailCode}
+                    >
+                        <Text style={styles.modalButtonText}>인증 확인</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
           </View>
-
-          {isEmailVerified && (
-            <Text style={styles.verifySuccessText}>✅ 이메일 인증이 완료되었습니다.</Text>
-          )}
-
-
-
-
-
-
+        </Modal>
 
         <TextInput
           placeholder="주소"
@@ -432,6 +443,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1E90FF',
   },
+  disabledButton: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ccc',
+  },
+  disabledButtonText: {
+    color: '#aaa',
+  },
   signupText: {
   },
   genderContainer: {
@@ -491,5 +509,15 @@ signupButtonText: {
   fontSize: 16,
   fontWeight: 'bold',
 },
+  // Modal Styles (Id.js와 동일, 필요시 공통 스타일로 분리 가능)
+  modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  modalContent: { width: '85%', backgroundColor: 'white', borderRadius: 10, padding: 20, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
+  modalInput: { width: '100%', borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 8, marginBottom: 10, textAlign: 'center', fontSize: 16 },
+  modalMessageText: { marginBottom: 15, fontSize: 14 },
+  modalButtonContainer: { flexDirection: 'row', width: '100%' },
+  modalButton: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: '#1E90FF', marginHorizontal: 5 },
+  modalCloseButton: { backgroundColor: '#6c757d' },
+  modalButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
 
 });

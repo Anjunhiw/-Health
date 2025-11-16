@@ -5,6 +5,7 @@ import Header from "../../Menu/Header";
 import Tab from "../../Menu/Bottom_Tab";
 import axios from "axios";
 import { API_URL } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Community() {
 
@@ -75,7 +76,7 @@ export default function Community() {
                             .map((post, index) => (
                                 <View key={index} style={styles.postCard}>
                                     <TouchableOpacity style={styles.rowContainer}
-                                    onPress={() => navigation.navigate('Cm_Detail')}>
+                                    onPress={() => navigation.navigate('Cm_Detail', { postId: post.id })}>
                                         <View style={styles.postHeader}>
                                             <Text style={styles.postTitle} numberOfLines={1}>{post.title}</Text>
                                             <Text style={styles.categoryLabel}># {post.category}</Text>

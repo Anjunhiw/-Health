@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal } from "react-native";
+import { TouchableOpacity, Text, View, StyleSheet, TextInput, KeyboardAvoidingView, Platform, Alert, Modal, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { API_URL } from "@env";
@@ -7,7 +7,7 @@ import userStore from "../../Store/userStore";
 
 export default function Pw() {
   const {
-    findAccountState: { userId, email, verifyNum, verifyMessage, modalVisible, isVerified },
+    findAccountState: { userId, email, verifyNum, verifyMessage, modalVisible, isVerified, loading },
     setFindAccountField,
     resetVerification,
     closeVerificationModal,
@@ -26,12 +26,13 @@ const onSendCode = async () => {
   const em = email.trim();
   const uid = userId.trim(); // ★ 추가
 
-  if (!uid) { Alert.alert("입력 오류", "아이디를 입력하세요."); return; }
   if (!em)  { Alert.alert("입력 오류", "이메일을 입력하세요."); return; }
+  if (!uid) { Alert.alert("입력 오류", "아이디를 입력하세요."); return; }
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
   if (!ok)  { Alert.alert("형식 오류", "올바른 이메일 형식이 아닙니다."); return; }
 
   try {
+    setFindAccountField('loading', true);
     // ★ userId도 같이 보냄
     await api.post("/auth/send-code", { userId: uid, email: em });
 
@@ -73,13 +74,12 @@ const onSendCode = async () => {
 
   // 비밀번호 재설정(다음 화면 이동/토큰 발급 등)
   const onResetPassword = () => {
-    // if (!isVerified) {
-    //   Alert.alert("인증 필요", "이메일 인증을 먼저 완료해주세요.");
-    //   return;
-    // }
+    if (!isVerified) {
+      Alert.alert("인증 필요", "이메일 인증을 먼저 완료해주세요.");
+      return;
+    }
     // 필요 시 userId와 email을 다음 화면으로 넘길 수 있음
     // navigation.navigate('PwReset', { userId, email });
-    Alert.alert("안내", `인증 완료. 비밀번호 재설정 절차로 이동합니다.\n아이디: ${userId || "(미입력)"}`);
         navigation.replace("Reset_Pw", {                       // <<----------------------- 수정 또는 추가
           userId: userId || "",
           email: email || "",
@@ -119,16 +119,51 @@ const onSendCode = async () => {
           <TextInput
             placeholder="이메일 주소"
             value={email}
-            onChangeText={(t) => setFindAccountField("email", t)}
+             onChangeText={(text) => { setFindAccountField('email', text);
+              if(isVerified) {
+                setFindAccountField('isVerified', false);
+              }
+            }}
             style={styles.input}
             keyboardType="email-address"
-            autoCapitalize="none"
+            editable={!isVerified}
           />
-          <TouchableOpacity style={styles.contactButton} onPress={onSendCode}>
-            <Text style={styles.contactButtonText}>인증</Text>
-          </TouchableOpacity>
+          <TouchableOpacity 
+                   style={[styles.contactButton, isVerified && styles.disabledButton]} 
+                   onPress={onSendCode}
+                   disabled={isVerified}>
+                     <Text style={[styles.contactButtonText, isVerified && styles.disabledButtonText]}>인증</Text>
+                   </TouchableOpacity>
         </View>
 
+       {loading && (
+  <View
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.3)", // 반투명 배경
+      zIndex: 1000,
+    }}
+  >
+    <View
+      style={{
+        padding: 20,
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      <ActivityIndicator size="small" color="#000" />
+      <Text style={{ marginLeft: 10 }}>잠시만 기다려주세요...</Text>
+    </View>
+  </View>
+)}
         {/* 인증 모달 */}
         <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={closeModal}>
           <View style={styles.modalOverlay}>
@@ -253,6 +288,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1E90FF',
+  },
+    disabledButton: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ccc',
+  },
+  disabledButtonText: {
+    color: '#aaa',
   },
   button: {
     backgroundColor: '#1E90FF',

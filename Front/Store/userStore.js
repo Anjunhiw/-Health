@@ -28,6 +28,9 @@ const userStore = create(set => ({
         address: '',
         gender: null,
         isIdChecked: false,
+        verifyNum: '',
+        verifyMessage: '',
+        modalVisible: false, // ✅ 모달 상태 추가
     },
     setSignupField: (field, value) =>
         set(state => ({
@@ -36,8 +39,17 @@ const userStore = create(set => ({
     resetSignupState: () => set({
         signupState: {
             userId: '', password: '', passwordConfirm: '', name: '',
-            contact: '', email: '', birthdate: '', address: '',
-            gender: null, isIdChecked: false,
+            contact: '', email: '', birthdate: '', address: '', gender: null,
+            isIdChecked: false, verifyNum: '', verifyMessage: '', modalVisible: false,
+        }
+    }),
+    // ✅ 회원가입용 모달 닫기 액션 추가
+    closeSignupModal: () => set ({
+        signupState: {
+            ...state.signupState,
+            modalVisible: false,
+            verifyNum: '',
+            verifyMessage: '',
         }
     }),
 
@@ -53,6 +65,8 @@ const userStore = create(set => ({
     isVerified: false,
     newPassword: '',
     newPasswordConfirm: '',
+    loading: false,
+    submitting: false,
   },
 
   // --- 아이디/비밀번호 찾기 액션 ---
@@ -69,6 +83,7 @@ const userStore = create(set => ({
         isVerified: false,
         verifyNum: '',
         verifyMessage: '',
+        loading: false,
       },
     })),
 
@@ -97,6 +112,8 @@ const userStore = create(set => ({
         isVerified: false,
         newPassword: '',
         newPasswordConfirm: '',
+        loading: false,
+        submitting: false,
       },
     }),
 }));

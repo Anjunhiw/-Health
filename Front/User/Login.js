@@ -8,10 +8,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@env";
 import userStore from "../Store/userStore";
 
-//import Constants from 'expo-constants';
+// import Constants from 'expo-constants';
 
-// Google 인증을 위한 라이브러리 임포트 (수정됨)
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+// // Google 인증을 위한 라이브러리 임포트 (수정됨)
+// import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 // import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 저장을 위해 필요
 
@@ -23,58 +23,58 @@ export default function Login() {
   const bounceValue = useRef(new Animated.Value(0)).current;
 
     // 구글 로그인 에러 상태 추가
-  const [googleError, setGoogleError] = useState(null);
+  // const [googleError, setGoogleError] = useState(null);
 
     // --- (수정됨) Google Sign-In 설정 ---
   // 컴포넌트 마운트 시 1회 실행하여 Google Sign-In을 설정합니다.
-  useEffect(() => {
-    GoogleSignin.configure({
-      // webClientId는 Google Cloud Console에서 'Web application' 타입으로 생성한 Client ID입니다.
-      // 기존 expoClientId와 동일한 값을 사용합니다.
-      webClientId: '927294612895-b9kfno3sq4m00dul44l9kg3lsjbrc6d5.apps.googleusercontent.com',
-      // androidClientId: '927294612895-bq30q934iifl86qc6vacgkcedvbvq9d1.apps.googleusercontent.com', // 스토어 출시용
-      // iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
-    });
-  }, []);
+  // useEffect(() => {
+  //   GoogleSignin.configure({
+  //     // webClientId는 Google Cloud Console에서 'Web application' 타입으로 생성한 Client ID입니다.
+  //     // 기존 expoClientId와 동일한 값을 사용합니다.
+  //     webClientId: '927294612895-b9kfno3sq4m00dul44l9kg3lsjbrc6d5.apps.googleusercontent.com',
+  //     // androidClientId: '927294612895-bq30q934iifl86qc6vacgkcedvbvq9d1.apps.googleusercontent.com', // 스토어 출시용
+  //     // iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com', // 스토어 출시용
+  //   });
+  // }, []);
 
-    // --- (신규) idToken을 스프링 서버로 전송하는 함수 ---
-  const sendTokenToServer = async (idToken) => {
-    try {
-      setGoogleError('서버와 통신 중...');
+  //   // --- (신규) idToken을 스프링 서버로 전송하는 함수 ---
+  // const sendTokenToServer = async (idToken) => {
+  //   try {
+  //     setGoogleError('서버와 통신 중...');
       
-      // Spring Boot 서버의 '/auth/google' 엔드포인트로 idToken을 전송합니다.
-      const response = await axios.post(`${API_URL}/auth/google`, {
-        idToken: idToken,
-      });
+  //     // Spring Boot 서버의 '/auth/google' 엔드포인트로 idToken을 전송합니다.
+  //     const response = await axios.post(`${API_URL}/auth/google`, {
+  //       idToken: idToken,
+  //     });
 
-      // 서버로부터 앱 전용 JWT(access_token)를 받음
-      const { access_token } = response.data; 
+  //     // 서버로부터 앱 전용 JWT(access_token)를 받음
+  //     const { access_token } = response.data; 
 
-      if (access_token) {
-        // (중요) 서버가 발급한 JWT를 AsyncStorage 등에 저장해야 합니다.
-        // await AsyncStorage.setItem('userToken', access_token);
+  //     if (access_token) {
+  //       // (중요) 서버가 발급한 JWT를 AsyncStorage 등에 저장해야 합니다.
+  //       // await AsyncStorage.setItem('userToken', access_token);
         
-        setGoogleError(null);
-        console.log('스프링 서버 로그인 성공! JWT:', access_token);
+  //       setGoogleError(null);
+  //       console.log('스프링 서버 로그인 성공! JWT:', access_token);
 
-        // 서버 로그인이 최종 성공하면 Home으로 이동
-        navigation.replace("Home");
+  //       // 서버 로그인이 최종 성공하면 Home으로 이동
+  //       navigation.replace("Home");
 
-      } else {
-        setGoogleError('서버로부터 토큰을 받지 못했습니다.');
-      }
+  //     } else {
+  //       setGoogleError('서버로부터 토큰을 받지 못했습니다.');
+  //     }
 
-    } catch (error) {
-      console.error('서버 통신 오류:', error);
-      if (error.response) {
-        // 서버가 에러 응답을 보낸 경우
-        setGoogleError(`서버 오류: ${error.response.data?.message || error.message}`);
-      } else {
-        // 네트워크 오류 등
-        setGoogleError(`서버 연결 실패: ${error.message}`);
-      }
-    }
-  };
+  //   } catch (error) {
+  //     console.error('서버 통신 오류:', error);
+  //     if (error.response) {
+  //       // 서버가 에러 응답을 보낸 경우
+  //       setGoogleError(`서버 오류: ${error.response.data?.message || error.message}`);
+  //     } else {
+  //       // 네트워크 오류 등
+  //       setGoogleError(`서버 연결 실패: ${error.message}`);
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     Animated.loop(
@@ -118,45 +118,54 @@ export default function Login() {
       }
 
     } catch (err) {
-      console.error("로그인 오류:", err);
-      Alert.alert("오류", "서버 연결에 실패했습니다. 네트워크 또는 백엔드를 확인하세요.");
+      // 서버에서 응답을 보냈지만, 성공(2xx) 상태 코드가 아닌 경우
+      if (err.response) {
+        console.error("로그인 응답 오류:", err.response.data);
+        // 서버가 보낸 에러 메시지를 우선적으로 사용
+        const message = err.response.data?.message || "아이디 또는 비밀번호를 확인해주세요.";
+        Alert.alert("로그인 실패", message);
+      } else {
+        // 네트워크 오류 등 서버에 요청조차 보내지 못한 경우
+        console.error("로그인 요청 오류:", err.message);
+        Alert.alert("오류", "서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.");
+      }
     }
   };
   // --- (수정됨) 새 Google 로그인 함수 ---
-  const signIn = async () => {
-    try {
-      // 1. 구글 플레이 서비스가 기기에서 사용 가능한지 확인
-      await GoogleSignin.hasPlayServices();
+  // const signIn = async () => {
+  //   try {
+  //     // 1. 구글 플레이 서비스가 기기에서 사용 가능한지 확인
+  //     await GoogleSignin.hasPlayServices();
       
-      // 2. 로그인 시도 및 사용자 정보 획득
-      const user = await GoogleSignin.signIn();
+  //     // 2. 로그인 시도 및 사용자 정보 획득
+  //     const user = await GoogleSignin.signIn();
       
-      // 3. 획득한 사용자 정보 콘솔에 출력
-      setGoogleError(null);
-      console.log('Google User Info:', user);
+  //     // 3. 획득한 사용자 정보 콘솔에 출력
+  //     setGoogleError(null);
+  //     console.log('Google User Info:', user);
       
-      const idToken = user.data.idToken; // <-- 이 토큰을 서버로 보냅니다.
+  //     const idToken = user.data.idToken; // <-- 이 토큰을 서버로 보냅니다.
 
-      if (idToken) {
-        // 4. (수정) Home으로 바로 이동하는 대신, 서버로 토큰 전송
-        await sendTokenToServer(idToken);
-      } else {
-        setGoogleError('구글로부터 idToken을 받지 못했습니다.');
-      }
+  //     if (idToken) {
+  //       // 4. (수정) Home으로 바로 이동하는 대신, 서버로 토큰 전송
+  //       await sendTokenToServer(idToken);
+  //     } else {
+  //       setGoogleError('구글로부터 idToken을 받지 못했습니다.');
+  //     }
 
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        setGoogleError('로그인 취소됨');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        setGoogleError('로그인 진행 중');
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        setGoogleError('구글 플레이 서비스를 사용할 수 없습니다');
-      } else {
-        setGoogleError(`로그인 실패: ${error.message}`);
-        console.error(error);
-      }
-    }
-  };
+  //   } catch (error) {
+  //     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+  //       setGoogleError('로그인 취소됨');
+  //     } else if (error.code === statusCodes.IN_PROGRESS) {
+  //       setGoogleError('로그인 진행 중');
+  //     } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+  //       setGoogleError('구글 플레이 서비스를 사용할 수 없습니다');
+  //     } else {
+  //       setGoogleError(`로그인 실패: ${error.message}`);
+  //       console.error(error);
+  //     }
+  //   }
+  // };
 
 
   return (
@@ -222,14 +231,14 @@ export default function Login() {
         {/* --- (수정됨) Google 버튼 --- */}
         <TouchableOpacity
           style={styles.googleButton}
-          onPress={signIn} // 'promptAsync' 대신 'signIn' 함수 호출
+          // onPress={signIn} // 'promptAsync' 대신 'signIn' 함수 호출
         >
           <Image source={require('../assets/google.png')} style={{ width: 24, height: 24 }} />
           <Text>Google로 시작하기</Text>
         </TouchableOpacity>
         
         {/* 구글 로그인 에러 메시지 표시 */}
-        {googleError && <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>오류: {googleError}</Text>}
+        {/* {googleError && <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>오류: {googleError}</Text>} */}
       </View>
 
 
