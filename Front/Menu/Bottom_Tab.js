@@ -47,7 +47,7 @@ export default function Tab() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton} onPress={() => navigation.replace("My")}>
            <Image 
-    source={route.name === 'My' 
+    source={route.name === 'My' || route.name === 'Calendar'
       ? require('../assets/mypage (2).png') 
       : require('../assets/mypage.png')} 
     style={{width: 75, height: 65}} 

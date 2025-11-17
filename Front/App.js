@@ -14,7 +14,7 @@ import Cm_Detail from "./Main/Community/Community_Detail";
 import Event from "./Main/Event/Event";
 import Wishlist from "./Main/Wishlist/Wishlist";
 import My from "./Main/Mypage/Mypage";
-import Calendar from "./Main/Mypage/Calendar";
+import CalendarComponent from "./Main/Mypage/Calendar";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,7 +36,7 @@ export default function App() {
         <Stack.Screen name="Event" component={Event} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="Wishlist" component={Wishlist} options={{headerShown: false, animation: 'simple_push'}}/>
         <Stack.Screen name="My" component={My} options={{headerShown: false, animation: 'simple_push'}}/>
-        <Stack.Screen name="Calendar" component={Calendar} options={{headerShown: false, animation: 'simple_push'}}/>
+        <Stack.Screen name="Calendar" component={CalendarComponent} options={{headerShown: false, animation: 'simple_push'}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
