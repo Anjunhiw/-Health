@@ -186,6 +186,56 @@ public class SignController {
         }
     }
 
+    
+    
+    
+    
+ 
+		   
+    
+    
+ // 📌 게시글 하나 상세 조회
+    @GetMapping("/community/{id}")
+    public ResponseEntity<Community> getPostDetail(@PathVariable("id") int id) {
+        logger.info("📝 [게시글 상세 조회 요청] id={}", id);
+
+        Community post = communityService.getCommunityById(id);
+
+        if (post == null) {
+            logger.warn("❌ [게시글 없음] id={}", id);
+            return ResponseEntity.notFound().build();
+        }
+
+        logger.info("✅ [게시글 상세 조회 성공] id={}, title={}", post.getId(), post.getTitle());
+        return ResponseEntity.ok(post);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // 마이페이지
     // 수정------------------------------------------------------------------------------------------------
     @PutMapping("/users/update/{userId}")

@@ -21,6 +21,10 @@ public class CommunityService {
     // 게시글 전체 조회
     public List<Community> getAllCommunity() {
         return communityMapper.selectAllCommunity();
-    
     }
+        // 🔹 게시글 하나 상세 조회
+        public Community getCommunityById(int id) {
+            return communityMapper.selectCommunityById(id);
+    }    
+    
 }

@@ -4,7 +4,10 @@ public class Community {
     private int id;            // 게시글 번호
     private String title;      // 제목
     private String content;    // 내용
-    private String category;  // 카테고리 필드 추가
+    private String category;   // 카테고리 필드 추가
+    private String writer;      // 작성
+    private String created_at;   // 작성일
+    
 	public int getId() {
 		return id;
 	}
@@ -29,9 +32,22 @@ public class Community {
 	public void setCategory(String category) {
 		this.category = category;
 	}
+	public String getwriter() {
+		return writer;
+	}
+	public void setwriter(String writer) {
+		this.writer = writer;
+	}
+	public String getcreated_at() {
+		return created_at;
+	}
+	public void setcreated_at(String created_at) {
+		this.created_at = created_at;
+	}
 	@Override
 	public String toString() {
-		return "Community [id=" + id + ", title=" + title + ", content=" + content + ", category=" + category + "]";
+		return "Community [id=" + id + ", title=" + title + ", content=" + content + ", category=" + category
+				+ ", writer=" + writer + ", created_at=" + created_at + "]";
 	}
 
 

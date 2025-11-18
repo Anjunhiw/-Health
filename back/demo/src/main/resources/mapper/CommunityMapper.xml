@@ -6,15 +6,20 @@
 
     <!-- 게시글 등록 -->
     <insert id="insertCommunity" parameterType="com.example.demo.Model.Community">
-        INSERT INTO community (title, content, category)
-        VALUES (#{title}, #{content}, #{category});
+        INSERT INTO community (title, content, category,writer)
+        VALUES (#{title}, #{content}, #{category}, #{writer});
     </insert>
 
 	<!-- 게시글 조회 -->
     <select id="selectAllCommunity" resultType="com.example.demo.Model.Community">
-        SELECT id, title, content, category, created_at
+        SELECT id, title, content, category, writer, created_at
         FROM community
         ORDER BY id DESC;
     </select>
     
+    <select id="selectCommunityById" parameterType="int" resultType="com.example.demo.Model.Community">
+		SELECT id, title, content, category, writer, created_at AS created_at
+		FROM community
+		WHERE id = #{id}
+    </select>
 </mapper>

@@ -17,61 +17,67 @@ export default function Cm_Detail() {
   useEffect(() => {
     const fetchPostDetail = async () => {
       if (!postId) {
-        Alert.alert("오류", "게시글 ID가 없습니다.");
-        setLoading(false);
+        Alert.alert("오류", "게시글 ID가 없습니다.");  // ✅
+        setLoading(false);                             // ✅
         return;
       }
 
-    //   try {
-    //     // 🚨 백엔드에 게시글 상세 정보를 가져오는 API 엔드포인트가 필요합니다.
-    //     //    예시: /community/{postId}
-    //     const response = await axios.get(`${API_URL}/community/${postId}`);
-    //     setPost(response.data);
-    //     setError(null);
-    //   } catch (err) {
-    //     console.error("게시글 상세 정보 로딩 실패:", err);
-    //     setError("게시글을 불러오는 데 실패했습니다.");
-    //     Alert.alert("오류", "게시글을 불러오는 중 문제가 발생했습니다.");
-    //   } finally {
-    //     setLoading(false);
-    //   }
+      try {
+        // 🚨 백엔드에 게시글 상세 정보를 가져오는 API 엔드포인트가 필요합니다.
+        //    예시: /community/{postId}
+        const response = await axios.get(`${API_URL}/community/${postId}`);
+        setPost(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("게시글 상세 정보 로딩 실패:", err);
+        setError("게시글을 불러오는 데 실패했습니다.");
+        Alert.alert("오류", "게시글을 불러오는 중 문제가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPostDetail();
   }, [postId]); // postId가 변경될 때마다 데이터를 다시 불러옵니다.
 
-  // 로딩 중일 때 표시할 화면
-//   if (loading) {
-//     return (
-//       <View style={styles.centerContainer}>
-//         <ActivityIndicator size="large" color="#1E90FF" />
-//         <Text style={styles.loadingText}>게시글을 불러오는 중...</Text>
-//       </View>
-//     );
-//   }
+  //로딩 중일 때 표시할 화면
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#1E90FF" />
+        <Text style={styles.loadingText}>게시글을 불러오는 중...</Text>
+      </View>
+    );
+  }
 
-  // 에러 발생 시 표시할 화면
-//   if (error || !post) {
-//     return (
-//       <View style={styles.centerContainer}>
-//         <Text style={styles.errorText}>{error || "게시글 정보를 찾을 수 없습니다."}</Text>
-//       </View>
-//     );
-//   }
+  //에러 발생 시 표시할 화면
+  if (error || !post) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error || "게시글 정보를 찾을 수 없습니다."}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Header />
       <ScrollView style={styles.content}>
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>제목</Text>
+          {/* 🔹 DB에서 온 제목 */}
+          <Text style={styles.title}>{post.title}</Text>
+
           <View style={styles.subContainer}>
-          <Text>작성자</Text>
-          <Text>작성일</Text>
+            <Text style={styles.metaText}>작성자: {post.writer}</Text>
+            <Text style={styles.metaText}>작성일: {post.created_at}</Text>
           </View>
         </View>
+
         <View style={styles.divider} />
-        <Text style={styles.body}>내용</Text>
+
+        {/* 🔹 DB에서 온 내용 */}
+        <Text style={styles.body}>{post.content}</Text>
+
       </ScrollView>
       <Tab />
     </View>

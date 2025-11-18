@@ -64,7 +64,18 @@ export default function My() {
 
             // ✅ 수정된 값 객체화
             const updated = tempInfo.reduce((acc, item) => {
-                acc[item.key] = item.value;
+                if (item.key === 'gender') {
+                    // 화면 값(남성/여성) → DB 코드값(male/female)으로 변환
+                    if (item.value === '남성') {
+                        acc.gender = 'male';
+                    } else if (item.value === '여성') {
+                        acc.gender = 'female';
+                    }
+                    // gender는 수정 화면에서 안 바꾸니까,
+                    // 사실상 원래 값 그대로 들어가는 효과
+                } else {
+                    acc[item.key] = item.value;
+                }
                 return acc;
             }, {});
 
